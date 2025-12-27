@@ -127,18 +127,7 @@ export const PRODUCTS: Product[] = [
     discount: 43,
     link: 'https://amzn.to/45tWfdF'
   },
-    {
-    id: '1766830785965',
-    title: 'Smart TV Ambilight 50" 4K, 50PUG8100/78, Comando de Voz, HDR10+/Dolby Atmos, VRR/ALLM, Bluetooth',
-    oldPrice: 1999,
-    newPrice: 1899,
-    image: 'https://m.media-amazon.com/images/I/61hTC1qv92L._AC_SX679_.jpg',
-    store: 'Amazon',
-    category: 'achados',
-    validity: '2026-12-27',
-    discount: 5,
-    link: 'https://amzn.to/4jiI699'
-  },
+ 
   {
     id: '1766830785965',
     title: 'Smart TV Ambilight 50" 4K, 50PUG8100/78, Comando de Voz, HDR10+/Dolby Atmos, VRR/ALLM, Bluetooth',
