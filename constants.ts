@@ -139,6 +139,43 @@ export const PRODUCTS: Product[] = [
     discount: 5,
     link: 'https://amzn.to/4jiI699'
   },
+  {
+    id: '1766830785965',
+    title: 'Smart TV Ambilight 50" 4K, 50PUG8100/78, Comando de Voz, HDR10+/Dolby Atmos, VRR/ALLM, Bluetooth',
+    oldPrice: 1999,
+    newPrice: 1899,
+    image: 'https://m.media-amazon.com/images/I/61hTC1qv92L._AC_SX679_.jpg',
+    store: 'Amazon',
+    category: 'achados',
+    validity: '2026-12-27',
+    discount: 5,
+    link: 'https://amzn.to/4jiI699'
+  },
+  {
+    id: '1766831694099',
+    title: 'vestido midi alça fina feminino de algodão com recortes',
+    oldPrice: 0,
+    newPrice: 239.99,
+    image: 'https://cea.vtexassets.com/arquivos/ids/59291602/Foto-0.jpg?v=638978794999130000',
+    store: 'C&A',
+    category: 'mulher',
+    validity: '2026-12-27',
+    discount: 0,
+    link: 'https://tidd.ly/3MN2TFH'
+  },
+  {
+    id: '1766832030333',
+    title: 'Tênis Campus 00s',
+    oldPrice: 0,
+    newPrice: 699,
+    image: 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/3945ab568a284371a0130e3c57d0c092_9366/Tenis_Campus_00s_Azul_IF8773_06_standard.jpg',
+    store: 'Adidas',
+    category: 'calcados',
+    validity: '2026-12-27',
+    discount: 0,
+    link: 'https://www.awin1.com/cread.php?awinmid=79926&awinaffid=2678244&ued=https%3A%2F%2Fwww.adidas.com.br%2Ftenis-campus-00s%2FIF8773.html'
+  },
+
   
  ];
 
