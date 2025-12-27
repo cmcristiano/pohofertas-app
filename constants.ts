@@ -115,18 +115,20 @@ export const PRODUCTS: Product[] = [
     link: 'https://amzn.to/3L9bq5d',
     store: 'Amazon'
   },
-  {
-    id: '1766793194689',
-    title: 'Fone de Ouvido Bluetooth 5.3, Graves Potentes, Drivers de 10mm, 30H de Reprodução, Resistência à Água, ',
-    oldPrice: 249,
-    newPrice: 166.19,
-    image: 'https://m.media-amazon.com/images/I/61ljZu9+GXL._AC_SX466_.jpg',
+    {
+    id: '1766829802450',
+    title: 'Fone de Ouvido Bluetooth 5.4 com Cancelamento de Ruído Adaptativo, Graves Poderosos',
+    oldPrice: 369,
+    newPrice: 209.9,
+    image: 'https://m.media-amazon.com/images/I/51dIzxMhd8L._AC_SX679_.jpg',
+    store: 'Amazon',
     category: 'tech',
-    validity: '2025-12-27',
-    discount: 33,
-    link: 'https://amzn.to/4b3n6AY',
-    store: 'Amazon'
+    validity: '2026-12-27',
+    discount: 43,
+    link: 'https://amzn.to/45tWfdF'
   },
+
+  
  ];
 
 export const SLIDES = [
