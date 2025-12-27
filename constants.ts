@@ -127,8 +127,7 @@ export const PRODUCTS: Product[] = [
     discount: 43,
     link: 'https://amzn.to/45tWfdF'
   },
- 
-  {
+   {
     id: '1766830785965',
     title: 'Smart TV Ambilight 50" 4K, 50PUG8100/78, Comando de Voz, HDR10+/Dolby Atmos, VRR/ALLM, Bluetooth',
     oldPrice: 1999,
@@ -165,7 +164,7 @@ export const PRODUCTS: Product[] = [
     link: 'https://www.awin1.com/cread.php?awinmid=79926&awinaffid=2678244&ued=https%3A%2F%2Fwww.adidas.com.br%2Ftenis-campus-00s%2FIF8773.html'
   },
 
-  
+
  ];
 
 export const SLIDES = [
