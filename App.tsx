@@ -31,29 +31,20 @@ const App = () => {
     return () => clearInterval(timer);
   }, []);
 
-  /**
-   * 🔥 FILTRO + ORDENAÇÃO POR MAIOR DESCONTO
-   * 1. Validade
-   * 2. Categoria
-   * 3. Busca
-   * 4. MAIOR DESCONTO PRIMEIRO
-   */
+  // FILTRO + ORDENAÇÃO POR MAIOR DESCONTO
   const filteredProducts = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     return PRODUCTS
       .filter((product) => {
-        // validade
         const validityDate = new Date(product.validity);
         if (validityDate < today) return false;
 
-        // categoria
         if (activeCategory !== 'all' && product.category !== activeCategory) {
           return false;
         }
 
-        // busca
         if (
           searchQuery &&
           !product.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -66,12 +57,9 @@ const App = () => {
       .sort((a, b) => {
         const da = Number(a.discount || 0);
         const db = Number(b.discount || 0);
-
-        // itens sem desconto sempre por último
         if (da === 0 && db > 0) return 1;
         if (db === 0 && da > 0) return -1;
-
-        return db - da; // maior desconto primeiro
+        return db - da;
       });
   }, [activeCategory, searchQuery]);
 
@@ -82,7 +70,8 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* TOPO */}
+
+      {/* TOP STRIPE */}
       <div className="bg-secondary text-white text-xs py-1.5 px-3 flex justify-between items-center">
         <span className="font-semibold">Site Oficial PohOfertas</span>
         <div className="flex items-center gap-3">
@@ -97,19 +86,34 @@ const App = () => {
 
       {/* HEADER */}
       <header className="sticky top-0 z-40 bg-white shadow-md">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-4 pt-3 pb-2">
           <div className="flex justify-between items-center mb-3">
-            <strong className="text-xl">PohOfertas</strong>
-            <a 
-              href="https://wa.me/5511999999999" 
-              target="_blank" 
-              rel="noreferrer"
-              className="bg-whatsapp text-white px-3 py-2 rounded-full font-bold text-xs flex items-center gap-1"
-            >
-              <Smartphone size={16} /> PEDIR OFERTA
-            </a>
+            <strong className="text-xl text-secondary">PohOfertas</strong>
+
+            <div className="flex gap-2">
+              {/* BOTÃO VER OFERTAS */}
+              <a
+                href="https://ofertas.pohofertas.com.br"
+                target="_blank"
+                rel="noreferrer"
+                className="bg-black text-white px-3 py-2 rounded-full font-bold text-xs flex items-center gap-1 hover:opacity-90"
+              >
+                🔥 VER OFERTAS
+              </a>
+
+              {/* BOTÃO WHATSAPP */}
+              <a 
+                href="https://wa.me/5511999999999" 
+                target="_blank" 
+                rel="noreferrer"
+                className="bg-whatsapp text-white px-3 py-2 rounded-full font-bold text-xs flex items-center gap-1"
+              >
+                <Smartphone size={16} /> PEDIR
+              </a>
+            </div>
           </div>
 
+          {/* BUSCA */}
           <input
             type="text"
             placeholder="O que você procura hoje?"
@@ -124,7 +128,13 @@ const App = () => {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
+              onClick={() => {
+                if (cat.id === 'ofertas') {
+                  window.open('https://ofertas.pohofertas.com.br', '_blank', 'noopener,noreferrer');
+                  return;
+                }
+                setActiveCategory(cat.id);
+              }}
               className={`px-3 py-2 rounded-lg text-xs font-bold ${
                 activeCategory === cat.id
                   ? 'bg-secondary text-white'
