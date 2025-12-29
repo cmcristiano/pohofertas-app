@@ -9,9 +9,11 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-import { CATEGORIES, PRODUCTS, SLIDES } from './constants';
+import { CATEGORIES, PRODUCTS } from './constants';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
+
+const MAX_SLIDES = 5;
 
 const App = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -20,15 +22,34 @@ const App = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  /* ---------------- SLIDER ---------------- */
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 4000);
-    return () => clearInterval(timer);
+  /* 🔥 PRODUTOS PARA O CARROSSEL (AUTOMÁTICO) */
+  const carouselProducts = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return PRODUCTS
+      .filter((p) => {
+        const validade = new Date(p.validity);
+        return validade >= today && p.discount > 0;
+      })
+      .sort((a, b) => b.discount - a.discount)
+      .slice(0, MAX_SLIDES);
   }, []);
 
-  /* -------- FILTRO + MAIOR DESCONTO -------- */
+  /* ⏱️ AUTO-PLAY DO CARROSSEL */
+  useEffect(() => {
+    if (carouselProducts.length === 0) return;
+
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) =>
+        prev === carouselProducts.length - 1 ? 0 : prev + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [carouselProducts.length]);
+
+  /* 🔎 FILTRO GERAL + ORDENAÇÃO */
   const filteredProducts = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -52,8 +73,8 @@ const App = () => {
         return true;
       })
       .sort((a, b) => {
-        const da = Number(a.discount || 0);
-        const db = Number(b.discount || 0);
+        const da = a.discount || 0;
+        const db = b.discount || 0;
         if (da === 0 && db > 0) return 1;
         if (db === 0 && da > 0) return -1;
         return db - da;
@@ -140,39 +161,50 @@ const App = () => {
         </nav>
       </header>
 
-      {/* CARROSSEL (RESTAURADO) */}
-      <section className="max-w-7xl mx-auto px-4 mt-4 mb-6">
-        <div className="relative overflow-hidden rounded-xl">
-          {SLIDES.map((slide, index) => (
-            <div
-              key={slide.id}
-              className={`transition-opacity duration-700 ${
-                index === currentSlide ? 'opacity-100' : 'opacity-0 absolute inset-0'
-              } ${slide.color}`}
-            >
-              <div className="grid grid-cols-2 items-center p-6 text-white">
-                <div>
-                  <h2 className="text-2xl font-black mb-2">{slide.text}</h2>
-                  <p className="mb-4">{slide.sub}</p>
-                  <a
-                    href={slide.link || 'https://ofertas.pohofertas.com.br'}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 bg-white text-black px-4 py-2 rounded font-bold"
-                  >
-                    Ver Agora <ArrowRight size={16} />
-                  </a>
+      {/* 🔥 CARROSSEL AUTOMÁTICO */}
+      {carouselProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 mt-4 mb-6">
+          <div className="relative overflow-hidden rounded-xl">
+            {carouselProducts.map((p, index) => (
+              <div
+                key={p.id}
+                className={`transition-opacity duration-700 ${
+                  index === currentSlide
+                    ? 'opacity-100'
+                    : 'opacity-0 absolute inset-0'
+                } bg-orange-600`}
+              >
+                <div className="grid grid-cols-2 items-center p-6 text-white">
+                  <div>
+                    <span className="inline-block bg-black text-xs px-2 py-1 rounded mb-2">
+                      {p.discount}% OFF
+                    </span>
+                    <h2 className="text-2xl font-black mb-2 line-clamp-2">
+                      {p.title}
+                    </h2>
+                    <p className="text-lg font-bold mb-4">
+                      R$ {p.newPrice.toFixed(2)}
+                    </p>
+                    <a
+                      href={p.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 bg-white text-black px-4 py-2 rounded font-bold"
+                    >
+                      Ver Oferta <ArrowRight size={16} />
+                    </a>
+                  </div>
+                  <img
+                    src={p.image || '/placeholder.png'}
+                    alt={p.title}
+                    className="max-h-56 object-contain mx-auto"
+                  />
                 </div>
-                <img
-                  src={slide.img}
-                  alt={slide.text}
-                  className="max-h-56 object-contain mx-auto"
-                />
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* PRODUTOS */}
       <main className="max-w-7xl mx-auto px-4 pb-10">
