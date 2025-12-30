@@ -23,18 +23,30 @@ const App = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   /* ======================================================
-     🔥 CARROSSEL AUTOMÁTICO (TOP DESCONTOS VÁLIDOS)
+     🔥 CARROSSEL INTELIGENTE (PRIORIDADE > DESCONTO)
      ====================================================== */
   const carouselProducts = useMemo(() => {
     const now = new Date();
 
     return PRODUCTS
+      // só produtos válidos
       .filter((p) => {
-        // 🔒 CORREÇÃO DEFINITIVA DE FUSO HORÁRIO
         const validade = new Date(p.validity + 'T23:59:59');
-        return validade >= now && (p.discount || 0) > 0;
+        return validade >= now;
       })
-      .sort((a, b) => (b.discount || 0) - (a.discount || 0))
+
+      // prioridade manda, depois desconto
+      .sort((a, b) => {
+        const pa = a.priority ?? 2; // default normal
+        const pb = b.priority ?? 2;
+
+        if (pa !== pb) return pa - pb;
+
+        const da = a.discount || 0;
+        const db = b.discount || 0;
+        return db - da;
+      })
+
       .slice(0, MAX_SLIDES);
   }, []);
 
@@ -49,14 +61,13 @@ const App = () => {
   }, [carouselProducts.length]);
 
   /* ======================================================
-     🛒 FILTRO PRINCIPAL + ORDENAÇÃO
+     🛒 GRID DE PRODUTOS (VALIDADE + CATEGORIA + BUSCA)
      ====================================================== */
   const filteredProducts = useMemo(() => {
     const now = new Date();
 
     return PRODUCTS
       .filter((p) => {
-        // 🔒 CORREÇÃO DEFINITIVA DE FUSO HORÁRIO
         const validade = new Date(p.validity + 'T23:59:59');
         if (validade < now) return false;
 
@@ -74,10 +85,13 @@ const App = () => {
         return true;
       })
       .sort((a, b) => {
+        const pa = a.priority ?? 2;
+        const pb = b.priority ?? 2;
+
+        if (pa !== pb) return pa - pb;
+
         const da = a.discount || 0;
         const db = b.discount || 0;
-        if (da === 0 && db > 0) return 1;
-        if (db === 0 && da > 0) return -1;
         return db - da;
       });
   }, [activeCategory, searchQuery]);
@@ -148,13 +162,7 @@ const App = () => {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => {
-                if (cat.id === 'ofertas') {
-                  window.open('https://ofertas.pohofertas.com.br', '_blank');
-                  return;
-                }
-                setActiveCategory(cat.id);
-              }}
+              onClick={() => setActiveCategory(cat.id)}
               className={`px-3 py-2 rounded-lg text-xs font-bold ${
                 activeCategory === cat.id
                   ? 'bg-slate-900 text-white'
@@ -182,9 +190,11 @@ const App = () => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6 p-6 md:p-10 text-white min-h-[220px] md:min-h-[260px]">
                   <div>
-                    <span className="inline-block bg-black/80 text-xs px-3 py-1 rounded-full mb-3 font-bold">
-                      🔥 {p.discount}% OFF
-                    </span>
+                    {p.discount > 0 && (
+                      <span className="inline-block bg-black/80 text-xs px-3 py-1 rounded-full mb-3 font-bold">
+                        🔥 {p.discount}% OFF
+                      </span>
+                    )}
 
                     <h2 className="text-xl md:text-3xl font-black leading-tight mb-3 line-clamp-2">
                       {p.title}
