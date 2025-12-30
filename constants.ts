@@ -259,8 +259,138 @@ export const PRODUCTS: Product[] = [
     discount: 56,
     link: 'https://amzn.to/3La5Rn4'
   },
-
-
+    {
+    id: '1767088177608',
+    title: 'Barra de Apoio para Banheiro Idoso, Kit com 2 Unidades de Aço Inox 40cm, barra de apoio para banheiro,​ Barra de Apoio Antiderrapante​, ​Apoio para Banheiro​',
+    oldPrice: 119.99,
+    newPrice: 107.99,
+    image: 'https://m.media-amazon.com/images/I/712hOas05jL._AC_SX679_.jpg',
+    store: 'Amazon',
+    category: 'casa',
+    validity: '2026-12-30',
+    discount: 10,
+    link: 'https://amzn.to/49CQI67'
+  },
+  {
+    id: '1767088310302',
+    title: 'Adaptador de Tomada T Articulado – 10A e 20A – Até 250V – Bivolt 110V/220V – T -',
+    oldPrice: 19,
+    newPrice: 17.2,
+    image: 'https://m.media-amazon.com/images/I/515hsrGdPkL._AC_SX679_.jpg',
+    store: 'Amazon',
+    category: 'tech',
+    validity: '2026-12-30',
+    discount: 9,
+    link: 'https://amzn.to/4b79pRy'
+  },
+  {
+    id: '1767088380346',
+    title: 'PHILIPS, Fone de Ouvido Sem Fio TWS, TAT2500BK/00, Bluetooth',
+    oldPrice: 156,
+    newPrice: 140,
+    image: 'https://m.media-amazon.com/images/I/51GRflT8RkL._AC_SY450_.jpg',
+    store: 'Amazon',
+    category: 'tech',
+    validity: '2026-12-30',
+    discount: 10,
+    link: 'https://amzn.to/3MZyrYO'
+  },
+  {
+    id: '1767088466861',
+    title: 'Cuscuzeira 16 Granitta Cuscuzeiro Craquelado Tampa de Vidro Com Válvula de Vapor Inox Resistente Revestimento Externo',
+    oldPrice: 59.99,
+    newPrice: 41.93,
+    image: 'https://m.media-amazon.com/images/I/71P6+l-067L._AC_SX522_.jpg',
+    store: 'Amazon',
+    category: 'cozinha',
+    validity: '2026-12-30',
+    discount: 30,
+    link: 'https://amzn.to/3YjA1Hv'
+  },
+  {
+    id: '1767088515073',
+    title: 'Bolsa Térmica GuardLunch 7L 2 Compartimentos ',
+    oldPrice: 49.97,
+    newPrice: 44.97,
+    image: 'https://m.media-amazon.com/images/I/71gNYzPW4FL._AC_SY450_.jpg',
+    store: 'Amazon',
+    category: 'cozinha',
+    validity: '2026-12-30',
+    discount: 10,
+    link: 'https://amzn.to/49x1NXf'
+  },
+  {
+    id: '1767088557032',
+    title: 'Formas de Gelo Mini com Tampa 3 Unidades – Silicone de Fácil Liberação',
+    oldPrice: 0,
+    newPrice: 17.97,
+    image: 'https://m.media-amazon.com/images/I/51-un2RKg2L._AC_SX450_.jpg',
+    store: 'Amazon',
+    category: 'cozinha',
+    validity: '2026-12-30',
+    discount: 0,
+    link: 'https://amzn.to/4q36Y7l'
+  },
+  {
+    id: '1767088671979',
+    title: 'Tilibra 305421 Universitário 10 Matérias Zip - Caderno Espiral, Capa Dura, 160 Folhas, Preto',
+    oldPrice: 24.3,
+    newPrice: 17.26,
+    image: 'https://m.media-amazon.com/images/I/41MAVv4bJPL._AC_SX522_.jpg',
+    store: 'Amazon',
+    category: 'escolar',
+    validity: '2026-12-30',
+    discount: 29,
+    link: 'https://amzn.to/4bib1b4'
+  },
+  {
+    id: '1767088704529',
+    title: 'Nota Autoadesiva, Tris, 7897476677446, Multicor, pacote de 100',
+    oldPrice: 7.31,
+    newPrice: 5.28,
+    image: 'https://m.media-amazon.com/images/I/517LfXVUw6L._AC_SY355_.jpg',
+    store: 'Amazon',
+    category: 'escolar',
+    validity: '2026-12-30',
+    discount: 28,
+    link: 'https://amzn.to/44N5o0J'
+  },
+  {
+    id: '1767088742490',
+    title: 'Tilibra - Caderno Sketchbook Espiral Capa Dura A4 Académie Essential 150 G 50 Folhas -, 322741',
+    oldPrice: 45.5,
+    newPrice: 27.56,
+    image: 'https://m.media-amazon.com/images/I/61p9cGzFyrL._AC_SY355_.jpg',
+    store: 'Amazon',
+    category: 'escolar',
+    validity: '2026-12-30',
+    discount: 39,
+    link: 'https://amzn.to/45mYTBX'
+  },
+  {
+    id: '1767088777434',
+    title: 'Tilibra Universitário D+ - Caderno Brochura Capa Dura, 200x275mm, 48 Folhas, Azul',
+    oldPrice: 0,
+    newPrice: 10.9,
+    image: 'https://m.media-amazon.com/images/I/41lOFoHnlzL._AC_SY355_.jpg',
+    store: 'Amazon',
+    category: 'escolar',
+    validity: '2026-12-30',
+    discount: 0,
+    link: 'https://amzn.to/3YQSxqM'
+  },
+  {
+    id: '1767088826884',
+    title: 'Bloco refil grande pautado 90g com 50 folhas Cirg4003 Caderno Inteligente',
+    oldPrice: 26.56,
+    newPrice: 24,
+    image: 'https://m.media-amazon.com/images/I/81RCvPtXPRL._AC_SY355_.jpg',
+    store: 'Amazon',
+    category: 'escolar',
+    validity: '2026-12-30',
+    discount: 10,
+    link: 'https://amzn.to/4jeDAYY'
+  },
  ];
 
 export const SLIDES = [
