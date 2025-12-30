@@ -14,7 +14,7 @@ import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
 const MAX_SLIDES = 5;
-const NOVOS_DIAS = 7; // 🔒 produtos dos últimos 7 dias
+const NOVOS_DIAS = 7;
 
 const App = () => {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -24,28 +24,22 @@ const App = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   /* ================================
-     🔥 CARROSSEL (MAIORES DESCONTOS)
+     🔥 CARROSSEL (TOP DESCONTOS)
      ================================ */
   const carouselProducts = useMemo(() => {
     const now = new Date();
-
     return PRODUCTS
-      .filter((p) => {
-        const validade = new Date(p.validity + 'T23:59:59');
-        return validade >= now && (p.discount || 0) > 0;
-      })
+      .filter(p => new Date(p.validity + 'T23:59:59') >= now && (p.discount || 0) > 0)
       .sort((a, b) => (b.discount || 0) - (a.discount || 0))
       .slice(0, MAX_SLIDES);
   }, []);
 
   useEffect(() => {
-    if (carouselProducts.length === 0) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) =>
-        prev === carouselProducts.length - 1 ? 0 : prev + 1
-      );
+    if (!carouselProducts.length) return;
+    const t = setInterval(() => {
+      setCurrentSlide(p => (p === carouselProducts.length - 1 ? 0 : p + 1));
     }, 4500);
-    return () => clearInterval(timer);
+    return () => clearInterval(t);
   }, [carouselProducts.length]);
 
   /* ================================
@@ -62,8 +56,11 @@ const App = () => {
         if (validade < now) return false;
 
         if (activeCategory === 'novos') {
-          const criado = new Date(Number(p.id));
-          return criado >= limiteNovos;
+          return new Date(Number(p.id)) >= limiteNovos;
+        }
+
+        if (activeCategory === 'descontos') {
+          return (p.discount || 0) >= 30;
         }
 
         if (activeCategory !== 'all' && p.category !== activeCategory) {
@@ -73,17 +70,11 @@ const App = () => {
         if (
           searchQuery &&
           !p.title.toLowerCase().includes(searchQuery.toLowerCase())
-        ) {
-          return false;
-        }
+        ) return false;
 
         return true;
       })
-      .sort((a, b) => {
-        const da = a.discount || 0;
-        const db = b.discount || 0;
-        return db - da;
-      });
+      .sort((a, b) => (b.discount || 0) - (a.discount || 0));
   }, [activeCategory, searchQuery]);
 
   const handleShare = (product: Product) => {
@@ -145,15 +136,23 @@ const App = () => {
               {cat.icon} {cat.label}
             </button>
           ))}
+
           <button
             onClick={() => setActiveCategory('novos')}
             className={`px-3 py-2 rounded-lg text-xs font-bold ${
-              activeCategory === 'novos'
-                ? 'bg-slate-900 text-white'
-                : 'bg-gray-100'
+              activeCategory === 'novos' ? 'bg-slate-900 text-white' : 'bg-gray-100'
             }`}
           >
             ✨ Novos
+          </button>
+
+          <button
+            onClick={() => setActiveCategory('descontos')}
+            className={`px-3 py-2 rounded-lg text-xs font-bold ${
+              activeCategory === 'descontos' ? 'bg-slate-900 text-white' : 'bg-gray-100'
+            }`}
+          >
+            💥 Descontos
           </button>
         </nav>
       </header>
