@@ -23,30 +23,35 @@ const App = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   /* ======================================================
-     🔥 CARROSSEL INTELIGENTE (PRIORIDADE > DESCONTO)
+     🧠 FUNÇÕES DE INTELIGÊNCIA
+     ====================================================== */
+  const getBadge = (p: Product) => {
+    const now = new Date();
+    const validade = new Date(p.validity + 'T23:59:59');
+    const diffHours = (validade.getTime() - now.getTime()) / 1000 / 60 / 60;
+
+    if (p.priority === 1) return { text: '🔥 DESTAQUE', color: 'bg-black' };
+    if (diffHours <= 24 && diffHours > 0) return { text: '⚠️ EXPIRA HOJE', color: 'bg-red-600' };
+    if (diffHours <= 72 && diffHours > 24) return { text: '⏳ ÚLTIMAS HORAS', color: 'bg-yellow-500 text-black' };
+    if ((p.discount || 0) >= 50) return { text: '💥 MAIOR DESCONTO', color: 'bg-green-600' };
+
+    return null;
+  };
+
+  /* ======================================================
+     🔥 CARROSSEL INTELIGENTE
      ====================================================== */
   const carouselProducts = useMemo(() => {
     const now = new Date();
 
     return PRODUCTS
-      // só produtos válidos
-      .filter((p) => {
-        const validade = new Date(p.validity + 'T23:59:59');
-        return validade >= now;
-      })
-
-      // prioridade manda, depois desconto
+      .filter((p) => new Date(p.validity + 'T23:59:59') >= now)
       .sort((a, b) => {
-        const pa = a.priority ?? 2; // default normal
+        const pa = a.priority ?? 2;
         const pb = b.priority ?? 2;
-
         if (pa !== pb) return pa - pb;
-
-        const da = a.discount || 0;
-        const db = b.discount || 0;
-        return db - da;
+        return (b.discount || 0) - (a.discount || 0);
       })
-
       .slice(0, MAX_SLIDES);
   }, []);
 
@@ -61,7 +66,7 @@ const App = () => {
   }, [carouselProducts.length]);
 
   /* ======================================================
-     🛒 GRID DE PRODUTOS (VALIDADE + CATEGORIA + BUSCA)
+     🛒 GRID DE PRODUTOS
      ====================================================== */
   const filteredProducts = useMemo(() => {
     const now = new Date();
@@ -70,29 +75,15 @@ const App = () => {
       .filter((p) => {
         const validade = new Date(p.validity + 'T23:59:59');
         if (validade < now) return false;
-
-        if (activeCategory !== 'all' && p.category !== activeCategory) {
-          return false;
-        }
-
-        if (
-          searchQuery &&
-          !p.title.toLowerCase().includes(searchQuery.toLowerCase())
-        ) {
-          return false;
-        }
-
+        if (activeCategory !== 'all' && p.category !== activeCategory) return false;
+        if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
         return true;
       })
       .sort((a, b) => {
         const pa = a.priority ?? 2;
         const pb = b.priority ?? 2;
-
         if (pa !== pb) return pa - pb;
-
-        const da = a.discount || 0;
-        const db = b.discount || 0;
-        return db - da;
+        return (b.discount || 0) - (a.discount || 0);
       });
   }, [activeCategory, searchQuery]);
 
@@ -104,190 +95,76 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* ================= TOPO ================= */}
+      {/* ================= HEADER TOPO ================= */}
       <div className="bg-slate-900 text-white text-xs px-4 py-1 flex justify-between items-center">
         <span>Site Oficial PohOfertas</span>
         <div className="flex gap-3 items-center">
-          <a href="https://www.instagram.com/pohachadinhos/" target="_blank" rel="noreferrer"><Instagram size={14} /></a>
-          <a href="https://www.facebook.com/PohAchadinhos" target="_blank" rel="noreferrer"><Facebook size={14} /></a>
-          <a href="https://t.me/+hqy-4LbvlpRhZGEx" target="_blank" rel="noreferrer"><Send size={14} /></a>
-          <a
-            href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU"
-            target="_blank"
-            rel="noreferrer"
-            className="font-bold flex items-center gap-1"
-          >
-            <Users size={14} /> Grupo VIP
-          </a>
+          <Instagram size={14} />
+          <Facebook size={14} />
+          <Send size={14} />
+          <Users size={14} />
         </div>
       </div>
-
-      {/* ================= HEADER ================= */}
-      <header className="bg-white sticky top-0 z-40 shadow">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex justify-between items-center mb-3">
-            <strong className="text-xl">PohOfertas</strong>
-
-            <div className="flex gap-2">
-              <a
-                href="https://ofertas.pohofertas.com.br"
-                target="_blank"
-                rel="noreferrer"
-                className="bg-black text-white px-3 py-2 rounded-full text-xs font-bold"
-              >
-                🔥 VER OFERTAS
-              </a>
-
-              <a
-                href="https://wa.me/5511999999999"
-                target="_blank"
-                rel="noreferrer"
-                className="bg-green-600 text-white px-3 py-2 rounded-full text-xs font-bold flex items-center gap-1"
-              >
-                <Smartphone size={14} /> PEDIR
-              </a>
-            </div>
-          </div>
-
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="O que você procura hoje?"
-            className="w-full border px-4 py-2 rounded-lg"
-          />
-        </div>
-
-        {/* ================= CATEGORIAS ================= */}
-        <nav className="flex gap-2 px-4 pb-3 overflow-x-auto">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-2 rounded-lg text-xs font-bold ${
-                activeCategory === cat.id
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-gray-100'
-              }`}
-            >
-              {cat.icon} {cat.label}
-            </button>
-          ))}
-        </nav>
-      </header>
 
       {/* ================= CARROSSEL ================= */}
       {carouselProducts.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 mt-4 mb-6">
           <div className="relative overflow-hidden rounded-2xl shadow-lg">
-            {carouselProducts.map((p, index) => (
-              <div
-                key={p.id}
-                className={`transition-all duration-700 ease-in-out ${
-                  index === currentSlide
-                    ? 'opacity-100 translate-x-0'
-                    : 'opacity-0 absolute inset-0 translate-x-10'
-                } bg-gradient-to-r from-orange-500 to-orange-600`}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6 p-6 md:p-10 text-white min-h-[220px] md:min-h-[260px]">
-                  <div>
-                    {p.discount > 0 && (
-                      <span className="inline-block bg-black/80 text-xs px-3 py-1 rounded-full mb-3 font-bold">
-                        🔥 {p.discount}% OFF
+            {carouselProducts.map((p, index) => {
+              const badge = getBadge(p);
+              return (
+                <div
+                  key={p.id}
+                  className={`transition-all duration-700 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                  } bg-gradient-to-r from-orange-500 to-orange-600`}
+                >
+                  <div className="p-6 text-white relative">
+                    {badge && (
+                      <span className={`absolute top-4 left-4 text-xs px-3 py-1 rounded-full font-bold ${badge.color}`}>
+                        {badge.text}
                       </span>
                     )}
-
-                    <h2 className="text-xl md:text-3xl font-black leading-tight mb-3 line-clamp-2">
-                      {p.title}
-                    </h2>
-
-                    <div className="flex items-center gap-3 mb-4">
-                      {p.oldPrice > 0 && (
-                        <span className="text-sm line-through opacity-70">
-                          R$ {p.oldPrice.toFixed(2)}
-                        </span>
-                      )}
-                      <span className="text-2xl md:text-3xl font-black">
-                        R$ {p.newPrice.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <a
-                      href={p.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 bg-white text-black px-5 py-3 rounded-full font-black text-sm hover:scale-105 transition"
-                    >
-                      VER OFERTA <ArrowRight size={16} />
+                    <h2 className="text-2xl font-black mb-2">{p.title}</h2>
+                    <p className="text-xl font-black">R$ {p.newPrice.toFixed(2)}</p>
+                    <a href={p.link} target="_blank" rel="noreferrer" className="inline-block mt-3 bg-white text-black px-5 py-2 rounded-full font-bold">
+                      VER OFERTA →
                     </a>
                   </div>
-
-                  <div className="flex justify-center">
-                    <img
-                      src={p.image || '/placeholder.png'}
-                      alt={p.title}
-                      className="max-h-[180px] md:max-h-[220px] object-contain drop-shadow-xl"
-                    />
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
 
-      {/* ================= PRODUTOS ================= */}
+      {/* ================= GRID ================= */}
       <main className="max-w-7xl mx-auto px-4 pb-10">
-        {filteredProducts.length === 0 ? (
-          <p className="text-center text-gray-500">
-            Nenhuma oferta disponível no momento.
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {filteredProducts.map((p) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {filteredProducts.map((p) => {
+            const badge = getBadge(p);
+            return (
               <div key={p.id} className="bg-white rounded-xl shadow p-3 relative">
-                {p.discount > 0 && (
-                  <span className="absolute top-0 left-0 bg-green-600 text-white text-xs px-2 py-1 rounded-br">
-                    {p.discount}% OFF
+                {badge && (
+                  <span className={`absolute top-0 left-0 text-xs px-2 py-1 rounded-br font-bold ${badge.color}`}>
+                    {badge.text}
                   </span>
                 )}
 
-                <button
-                  onClick={() => handleShare(p)}
-                  className="absolute top-2 right-2"
-                >
+                <button onClick={() => handleShare(p)} className="absolute top-2 right-2">
                   <LinkIcon size={16} />
                 </button>
 
-                <img
-                  src={p.image || '/placeholder.png'}
-                  alt={p.title}
-                  className="w-full h-40 object-contain mb-2"
-                />
-
+                <img src={p.image} alt={p.title} className="w-full h-40 object-contain mb-2" />
                 <h3 className="text-xs mb-1 line-clamp-2">{p.title}</h3>
-
-                {p.oldPrice > 0 && (
-                  <p className="text-xs text-gray-400 line-through">
-                    R$ {p.oldPrice.toFixed(2)}
-                  </p>
-                )}
-
-                <p className="font-black text-lg">
-                  R$ {p.newPrice.toFixed(2)}
-                </p>
-
-                <a
-                  href={p.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block mt-2 bg-orange-600 text-white text-center py-2 rounded font-bold text-sm"
-                >
+                <p className="font-black text-lg">R$ {p.newPrice.toFixed(2)}</p>
+                <a href={p.link} target="_blank" rel="noreferrer" className="block mt-2 bg-orange-600 text-white text-center py-2 rounded font-bold text-sm">
                   VER OFERTA
                 </a>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </main>
 
       <ShareModal
