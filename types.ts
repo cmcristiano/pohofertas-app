@@ -1,15 +1,18 @@
-export interface Product {
+export type Category = {
+  id: string;
+  label: string;
+  icon: string;
+};
+
+export type Product = {
   id: string;
   title: string;
   oldPrice: number;
   newPrice: number;
   image: string;
+  store: string;
   category: string;
   validity: string;
   discount: number;
   link: string;
-  store: string;
-
-  // 🔥 CONTROLE DO SITE (opcional)
-  priority?: number; // 1 = destaque | 2 = normal | 3 = baixo
-}
+};
