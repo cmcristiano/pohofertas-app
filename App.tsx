@@ -3,14 +3,19 @@ const filteredProducts = useMemo(() => {
 
   return PRODUCTS
     .filter((p) => {
-      const validade = new Date(p.validity + 'T23:59:59');
-      if (validade < now) return false;
+      // 🔒 VALIDADE BLINDADA
+      if (p.validity) {
+        const validade = new Date(p.validity + 'T23:59:59');
+        if (isNaN(validade.getTime())) return true; // se der erro, não bloqueia
+        if (validade < now) return false;
+      }
 
-      // 🔒 REGRA CORRETA PARA "TUDO"
+      // 🔒 CATEGORIA
       if (activeCategory !== 'all' && p.category !== activeCategory) {
         return false;
       }
 
+      // 🔒 BUSCA
       if (
         searchQuery &&
         !p.title.toLowerCase().includes(searchQuery.toLowerCase())
