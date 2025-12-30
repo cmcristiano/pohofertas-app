@@ -180,7 +180,7 @@ export const PRODUCTS: Product[] = [
     title: 'Mustela Stelatopia+ Hidratante Relipidante Antiprurido 300 ml - Hidratação Imediata e Profunda para Peles Secas e Extremamente Secas Seguro Para Bebês, Crianças e Adultos - Sem Fragrância - Stelatopia',
     oldPrice: 218.46,
     newPrice: 104.4,
-    image: '',
+    image: 'https://m.media-amazon.com/images/I/41-bgYFF0nL._AC_SX679_.jpg',
     store: 'Amazon',
     category: 'beleza',
     validity: '2026-12-27',
