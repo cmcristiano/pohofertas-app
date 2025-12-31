@@ -15,4 +15,17 @@ export const CATEGORIES: Category[] = [
   { id: 'escolar', label: 'Escolar', icon: '✏️' },
 ];
 
-export const PRODUCTS: Product[] = [];
+export const PRODUCTS: Product[] = [ 
+  {
+    id: '1767170589533',
+    title: 'WAP Ventilador de Mesa e Parede 50cm FLOW TURBO, com Tecnologia Silenciosa e Econômica, 8 Pás e 3 Velocidades, 180W 220V',
+    oldPrice: 279,
+    newPrice: 164,
+    image: 'https://m.media-amazon.com/images/I/8194vs7pwxL._AC_SX679_.jpg',
+    store: 'Amazon',
+    category: 'casa',
+    validity: '2026-12-31',
+    discount: 41,
+    link: 'https://amzn.to/4pep05b'
+  },
+];
