@@ -86,7 +86,7 @@ const App = () => {
             <div className="flex items-center gap-2">
                {/* Logo SVG Inline */}
                <svg 
-                 viewBox="0 0 220 50" 
+                 viewBox="0 0 260 50" 
                  className="w-[180px] md:w-[210px] h-[40px] md:h-[50px]" 
                  fill="none" 
                  xmlns="http://www.w3.org/2000/svg"
