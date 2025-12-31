@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Eye, Lock, LogOut, Check, AlertCircle } from 'lucide-react';
+import { Eye, Lock, LogOut, AlertCircle, Check } from 'lucide-react';
 
 interface FormData {
   title: string;
@@ -13,7 +15,6 @@ interface FormData {
 }
 
 const CATEGORIES = [
-  { id: 'all', label: '📦 Todos' },
   { id: 'eletronicos', label: '📱 Eletrônicos' },
   { id: 'livros', label: '📚 Livros' },
   { id: 'moda', label: '👕 Moda' },
@@ -42,7 +43,8 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+    const correctPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+    if (password === correctPassword) {
       setIsAuthenticated(true);
       setMessage({ type: 'success', text: '✅ Autenticado com sucesso!' });
     } else {
@@ -95,7 +97,7 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage({ type: 'success', text: `✅ Produto adicionado! (ID: ${data.productId})` });
+        setMessage({ type: 'success', text: `✅ Produto adicionado! ID: ${data.productId}` });
         setFormData({
           title: '',
           link: '',
@@ -167,10 +169,8 @@ export default function AdminPage() {
     );
   }
 
-  // Layout logado
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-black text-primary">📊 PohOfertas Admin</h1>
@@ -184,96 +184,152 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Formulário */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-black text-secondary mb-6">
-                ➕ Adicionar Nova Oferta
-              </h2>
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-2xl font-black text-secondary mb-6">➕ Adicionar Nova Oferta</h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Título */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Título do Produto *
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="ex: iPhone 15 Pro Max 512GB"
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
-                  />
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Título *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="ex: iPhone 15 Pro Max"
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+              />
+            </div>
 
-                {/* Link de Afiliado */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Link de Afiliado *
-                  </label>
-                  <input
-                    type="url"
-                    name="link"
-                    value={formData.link}
-                    onChange={handleInputChange}
-                    placeholder="https://amazon.com.br/..."
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Link de Afiliado *</label>
+              <input
+                type="url"
+                name="link"
+                value={formData.link}
+                onChange={handleInputChange}
+                placeholder="https://amazon.com.br/..."
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+              />
+            </div>
 
-                {/* URL da Imagem */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    URL da Imagem *
-                  </label>
-                  <input
-                    type="url"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleInputChange}
-                    placeholder="https://..."
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">URL da Imagem *</label>
+              <input
+                type="url"
+                name="image"
+                value={formData.image}
+                onChange={handleInputChange}
+                placeholder="https://..."
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+              />
+            </div>
 
-                {/* Preços */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Preço Original
-                    </label>
-                    <input
-                      type="number"
-                      name="oldPrice"
-                      value={formData.oldPrice}
-                      onChange={handleInputChange}
-                      placeholder="999.99"
-                      step="0.01"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Preço Atual *
-                    </label>
-                    <input
-                      type="number"
-                      name="newPrice"
-                      value={formData.newPrice}
-                      onChange={handleInputChange}
-                      placeholder="599.99"
-                      step="0.01"
-                      required
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
-                    />
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Preço Original</label>
+                <input
+                  type="number"
+                  name="oldPrice"
+                  value={formData.oldPrice}
+                  onChange={handleInputChange}
+                  placeholder="999.99"
+                  step="0.01"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Preço Atual *</label>
+                <input
+                  type="number"
+                  name="newPrice"
+                  value={formData.newPrice}
+                  onChange={handleInputChange}
+                  placeholder="599.99"
+                  step="0.01"
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                />
+              </div>
+            </div>
 
-                {/* Categoria e Loja */}
-                <div className="grid grid-
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Categoria *</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Loja *</label>
+                <select
+                  name="store"
+                  value={formData.store}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                >
+                  {STORES.map(store => (
+                    <option key={store} value={store}>{store}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Data de Validade *</label>
+              <input
+                type="date"
+                name="validity"
+                value={formData.validity}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+              />
+            </div>
+
+            {formData.oldPrice && formData.newPrice && (
+              <div className="bg-blue-50 border-l-4 border-primary p-4 rounded">
+                <p className="text-sm text-gray-700">
+                  <strong>Desconto calculado:</strong> {calculateDiscount()}%
+                </p>
+              </div>
+            )}
+
+            {message && (
+              <div className={`p-4 rounded-lg flex items-center gap-2 ${
+                message.type === 'success'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                {message.type === 'success' ? (
+                  <Check size={20} />
+                ) : (
+                  <AlertCircle size={20} />
+                )}
+                {message.text}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-primary hover:bg-orange-700 disabled:bg-gray-400 text-white font-black py-3 rounded-lg transition transform hover:scale-105"
+            >
+              {isLoading ? '⏳ Publicando...' : '✅ Publicar Oferta'}
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
+  );
+}
