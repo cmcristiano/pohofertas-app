@@ -29,79 +29,85 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* TOPO */}
-      <header className="bg-white shadow sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* LOGO SVG */}
-          <svg
-            viewBox="0 0 220 50"
-            className="h-10"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g transform="translate(0,5)">
-              <path
-                d="M5 20C5 14 9 10 15 10H30L50 30L30 50H15C9 50 5 46 5 40V20Z"
-                fill="#FF6600"
-                transform="rotate(-15 25 30)"
-              />
-              <circle cx="18" cy="12" r="3" fill="#fff" />
-              <path
-                d="M18 28L24 34L36 18"
-                stroke="#fff"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            </g>
-            <text
-              x="60"
-              y="36"
-              fontSize="32"
-              fontWeight="800"
-              fill="#0A192F"
-            >
-              PohOfertas
-            </text>
-          </svg>
-
-          <a
-            href="#"
-            className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1"
-          >
-            <Smartphone size={16} />
-            PEDIR
-          </a>
-        </div>
-
-        {/* BUSCA */}
-        <div className="px-4 pb-3 max-w-7xl mx-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 focus:bg-white border"
-              placeholder="O que você procura hoje?"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+      {/* B) HEADER (Sticky) */}
+<header className="sticky top-0 z-40 bg-white shadow-md">
+  <div className="container mx-auto px-4 pt-3 pb-2">
+    {/* Linha superior */}
+    <div className="flex justify-between items-center mb-2">
+      {/* LOGO + SLOGAN */}
+      <div className="flex flex-col items-start">
+        <svg
+          viewBox="0 0 220 50"
+          className="w-[180px] h-[44px]"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-label="PohOfertas Logo"
+        >
+          <g transform="translate(0,5)">
+            <path
+              d="M5 20C5 14.5 9.5 10 15 10H30L50 30L30 50H15C9.5 50 5 45.5 5 40V20Z"
+              fill="#FF6600"
+              transform="rotate(-15 25 30)"
             />
-          </div>
-        </div>
+            <circle
+              cx="18"
+              cy="14"
+              r="3"
+              fill="#fff"
+              transform="rotate(-15 25 30)"
+            />
+            <path
+              d="M18 28L24 34L36 18"
+              stroke="#fff"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              transform="rotate(-5 25 30)"
+            />
+          </g>
 
-        {/* CATEGORIAS */}
-        <nav className="flex gap-2 px-4 pb-3 overflow-x-auto">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                activeCategory === cat.id
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              {cat.icon} {cat.label}
-            </button>
-          ))}
-        </nav>
-      </header>
+          <text
+            x="60"
+            y="36"
+            fontFamily="'Segoe UI', Roboto, sans-serif"
+            fontWeight="800"
+            fontSize="32"
+            fill="#0A192F"
+            letterSpacing="-0.5"
+          >
+            PohOfertas
+          </text>
+        </svg>
 
+        <span className="text-[10px] font-bold tracking-widest text-gray-500 ml-1">
+          SELEÇÃO OFICIAL DAS MELHORES OPORTUNIDADES
+        </span>
+      </div>
+
+      {/* BOTÃO PEDIR */}
+      <a
+        href="https://wa.me/5511999999999"
+        target="_blank"
+        rel="noreferrer"
+        className="bg-green-600 text-white px-3 py-2 rounded-full font-bold text-xs flex items-center gap-1 shadow hover:scale-105 transition"
+      >
+        PEDIR
+      </a>
+    </div>
+
+    {/* BUSCA */}
+    <div className="relative w-full">
+      <input
+        type="text"
+        placeholder="O que você procura hoje?"
+        className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg outline-none text-sm"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+    </div>
+  </div>
+</header>
       {/* PRODUTOS */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         {filteredProducts.length === 0 ? (
