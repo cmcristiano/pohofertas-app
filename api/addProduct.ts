@@ -1,4 +1,4 @@
-import { Octokit } from "@octokit/rest";
+import { NextRequest, NextResponse } from 'next/server';
 
 interface ProductData {
   link: string;
@@ -12,51 +12,50 @@ interface ProductData {
   validity: string;
 }
 
-export default async function handler(req, res) {
-  // Apenas POST
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  // Validar token
-  const { ADMIN_TOKEN } = process.env;
-  const token = req.headers["authorization"]?.split("Bearer ")[1];
-
-  if (!token || token !== ADMIN_TOKEN) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    const productData: ProductData = req.body;
+    // Validar token
+    const token = req.headers.get('authorization')?.split('Bearer ')[1];
+    const adminToken = process.env.ADMIN_TOKEN;
+
+    if (!token || token !== adminToken) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const productData: ProductData = await req.json();
 
     // Validar dados obrigatórios
     if (!productData.link || !productData.image || !productData.newPrice || !productData.category) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     // Inicializar Octokit com GitHub token
+    const { Octokit } = await import('@octokit/rest');
     const octokit = new Octokit({
       auth: process.env.GITHUB_TOKEN,
     });
 
     // Ler arquivo constants.ts
     const { data: fileData } = await octokit.repos.getContent({
-      owner: "cmcristiano",
-      repo: "pohofertas-app",
-      path: "src/constants.ts",
-    });
+      owner: 'cmcristiano',
+      repo: 'pohofertas-app',
+      path: 'src/constants.ts',
+    }) as any;
 
-    const fileContent = Buffer.from(fileData.content as string, "base64").toString("utf-8");
+    const fileContent = Buffer.from(fileData.content as string, 'base64').toString('utf-8');
 
-    // Extrair array PRODUCTS
-    const productsMatch = fileContent.match(/export const PRODUCTS = \[([\s\S]*?)\];/);
-    if (!productsMatch) {
-      return res.status(500).json({ error: "Could not parse PRODUCTS array" });
-    }
+    // Extrair próximo ID
+    const idMatches = fileContent.match(/id: (\d+)/g) || [];
+    const ids = idMatches.map(m => parseInt(m.match(/\d+/)![0]));
+    const newId = Math.max(...ids, 0) + 1;
 
-    // Criar novo produto com ID único
-    const newId = Math.max(...fileContent.match(/id: (\d+)/g).map(m => parseInt(m.match(/\d+/)[0])), 0) + 1;
-
+    // Criar novo produto
     const newProduct = `  {
     id: ${newId},
     title: "${productData.title.replace(/"/g, '\\"')}",
@@ -70,31 +69,37 @@ export default async function handler(req, res) {
     validity: "${productData.validity}",
   },`;
 
-    // Adicionar novo produto ao array
+    // Adicionar novo produto antes do fechamento do array
     const newContent = fileContent.replace(
-      /export const PRODUCTS = \[([\s\S]*?)\];/,
-      `export const PRODUCTS = [\n${productsMatch[1]}\n${newProduct}\n];`
+      /export const PRODUCTS = \[(\s*)(.*?)(\s*)\];/s,
+      `export const PRODUCTS = [\n$2\n${newProduct}\n];`
     );
 
     // Fazer commit no GitHub
     await octokit.repos.createOrUpdateFileContents({
-      owner: "cmcristiano",
-      repo: "pohofertas-app",
-      path: "src/constants.ts",
-      message: `Add: New product "${productData.title}" - ${productData.category}`,
-      content: Buffer.from(newContent).toString("base64"),
-      sha: fileData.sha as string,
+      owner: 'cmcristiano',
+      repo: 'pohofertas-app',
+      path: 'src/constants.ts',
+      message: `feat: Add product "${productData.title}" (${productData.category})`,
+      content: Buffer.from(newContent).toString('base64'),
+      sha: (fileData as any).sha as string,
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Product added successfully",
-      productId: newId,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Product added successfully',
+        productId: newId,
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Internal server error",
-    });
+    console.error('Error:', error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 }
+    );
   }
 }
