@@ -1,7 +1,5 @@
-'use client';
-
-import React, { useState } from 'react';
-import { Eye, Lock, LogOut, AlertCircle, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Lock, LogOut, AlertCircle, Check } from 'lucide-react';
 
 interface FormData {
   title: string;
@@ -55,7 +53,7 @@ export default function AdminPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -123,15 +121,15 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-secondary to-blue-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#0A192F] to-blue-900 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
           <div className="flex justify-center mb-6">
-            <div className="bg-primary p-4 rounded-full">
+            <div className="bg-[#FF6B00] p-4 rounded-full">
               <Lock size={32} className="text-white" />
             </div>
           </div>
-          
-          <h1 className="text-3xl font-black text-center text-secondary mb-2">
+
+          <h1 className="text-3xl font-black text-center text-[#0A192F] mb-2">
             PohOfertas Admin
           </h1>
           <p className="text-center text-gray-500 text-sm mb-8">
@@ -144,23 +142,25 @@ export default function AdminPage() {
               placeholder="Digite a senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none font-semibold"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none font-semibold"
               autoFocus
             />
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-orange-700 text-white font-black py-3 rounded-lg transition transform hover:scale-105"
+              className="w-full bg-[#FF6B00] hover:bg-orange-700 text-white font-black py-3 rounded-lg transition transform hover:scale-105"
             >
               Entrar
             </button>
           </form>
 
           {message && (
-            <div className={`mt-4 p-3 rounded-lg text-sm ${
-              message.type === 'success' 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-red-100 text-red-700'
-            }`}>
+            <div
+              className={`mt-4 p-3 rounded-lg text-sm ${
+                message.type === 'success'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              }`}
+            >
               {message.text}
             </div>
           )}
@@ -173,7 +173,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-black text-primary">📊 PohOfertas Admin</h1>
+          <h1 className="text-2xl font-black text-[#FF6B00]">📊 PohOfertas Admin</h1>
           <button
             onClick={() => setIsAuthenticated(false)}
             className="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg font-semibold transition"
@@ -186,7 +186,7 @@ export default function AdminPage() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-black text-secondary mb-6">➕ Adicionar Nova Oferta</h2>
+          <h2 className="text-2xl font-black text-[#0A192F] mb-6">➕ Adicionar Nova Oferta</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -198,7 +198,7 @@ export default function AdminPage() {
                 onChange={handleInputChange}
                 placeholder="ex: iPhone 15 Pro Max"
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
               />
             </div>
 
@@ -211,7 +211,7 @@ export default function AdminPage() {
                 onChange={handleInputChange}
                 placeholder="https://amazon.com.br/..."
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
               />
             </div>
 
@@ -224,7 +224,7 @@ export default function AdminPage() {
                 onChange={handleInputChange}
                 placeholder="https://..."
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
               />
             </div>
 
@@ -238,7 +238,7 @@ export default function AdminPage() {
                   onChange={handleInputChange}
                   placeholder="999.99"
                   step="0.01"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
                 />
               </div>
               <div>
@@ -251,7 +251,7 @@ export default function AdminPage() {
                   placeholder="599.99"
                   step="0.01"
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
                 />
               </div>
             </div>
@@ -263,10 +263,12 @@ export default function AdminPage() {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
                 >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -276,10 +278,12 @@ export default function AdminPage() {
                   name="store"
                   value={formData.store}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
                 >
-                  {STORES.map(store => (
-                    <option key={store} value={store}>{store}</option>
+                  {STORES.map((store) => (
+                    <option key={store} value={store}>
+                      {store}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -293,12 +297,12 @@ export default function AdminPage() {
                 value={formData.validity}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B00] outline-none"
               />
             </div>
 
             {formData.oldPrice && formData.newPrice && (
-              <div className="bg-blue-50 border-l-4 border-primary p-4 rounded">
+              <div className="bg-blue-50 border-l-4 border-[#FF6B00] p-4 rounded">
                 <p className="text-sm text-gray-700">
                   <strong>Desconto calculado:</strong> {calculateDiscount()}%
                 </p>
@@ -306,11 +310,13 @@ export default function AdminPage() {
             )}
 
             {message && (
-              <div className={`p-4 rounded-lg flex items-center gap-2 ${
-                message.type === 'success'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
-              }`}>
+              <div
+                className={`p-4 rounded-lg flex items-center gap-2 ${
+                  message.type === 'success'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+                }`}
+              >
                 {message.type === 'success' ? (
                   <Check size={20} />
                 ) : (
@@ -323,7 +329,7 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-orange-700 disabled:bg-gray-400 text-white font-black py-3 rounded-lg transition transform hover:scale-105"
+              className="w-full bg-[#FF6B00] hover:bg-orange-700 disabled:bg-gray-400 text-white font-black py-3 rounded-lg transition transform hover:scale-105"
             >
               {isLoading ? '⏳ Publicando...' : '✅ Publicar Oferta'}
             </button>
