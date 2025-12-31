@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 interface ProductData {
   link: string;
@@ -12,43 +12,47 @@ interface ProductData {
   validity: string;
 }
 
-export async function POST(req: NextRequest) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
     // Validar token
-    const token = req.headers.get('authorization')?.split('Bearer ')[1];
+    const token = req.headers.authorization?.split('Bearer ')[1];
     const adminToken = process.env.ADMIN_TOKEN;
 
     if (!token || token !== adminToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const productData: ProductData = await req.json();
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const productData: ProductData = req.body;
 
     // Validar dados obrigatórios
     if (!productData.link || !productData.image || !productData.newPrice || !productData.category) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Inicializar Octokit com GitHub token
+    // Importar Octokit
     const { Octokit } = await import('@octokit/rest');
     const octokit = new Octokit({
       auth: process.env.GITHUB_TOKEN,
     });
 
     // Ler arquivo constants.ts
-    const { data: fileData } = await octokit.repos.getContent({
+    const fileData = await octokit.repos.getContent({
       owner: 'cmcristiano',
       repo: 'pohofertas-app',
       path: 'src/constants.ts',
-    }) as any;
+    });
 
-    const fileContent = Buffer.from(fileData.content as string, 'base64').toString('utf-8');
+    const fileContent = Buffer.from(
+      (fileData.data as any).content,
+      'base64'
+    ).toString('utf-8');
 
     // Extrair próximo ID
     const idMatches = fileContent.match(/id: (\d+)/g) || [];
@@ -69,10 +73,10 @@ export async function POST(req: NextRequest) {
     validity: "${productData.validity}",
   },`;
 
-    // Adicionar novo produto antes do fechamento do array
+    // Adicionar novo produto
     const newContent = fileContent.replace(
-      /export const PRODUCTS = \[(\s*)(.*?)(\s*)\];/s,
-      `export const PRODUCTS = [\n$2\n${newProduct}\n];`
+      /export const PRODUCTS = \[([\s\S]*?)\];/,
+      `export const PRODUCTS = [$1\n${newProduct}\n];`
     );
 
     // Fazer commit no GitHub
@@ -82,24 +86,18 @@ export async function POST(req: NextRequest) {
       path: 'src/constants.ts',
       message: `feat: Add product "${productData.title}" (${productData.category})`,
       content: Buffer.from(newContent).toString('base64'),
-      sha: (fileData as any).sha as string,
+      sha: (fileData.data as any).sha,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Product added successfully',
-        productId: newId,
-      },
-      { status: 200 }
-    );
+    return res.status(200).json({
+      success: true,
+      message: 'Product added successfully',
+      productId: newId,
+    });
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Internal server error',
-      },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : 'Internal server error',
+    });
   }
 }
