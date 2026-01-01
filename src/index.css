@@ -1,0 +1,36 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f3f4f6;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Tailwind Classes Manual */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bg-primary { background-color: #FF6600; }
+.text-primary { color: #FF6600; }
+.bg-secondary { background-color: #0A192F; }
+.text-secondary { color: #0A192F; }
+.bg-whatsapp { background-color: #25D366; }
+.text-whatsapp { color: #25D366; }

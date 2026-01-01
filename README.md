@@ -2,19 +2,22 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# PohOfertas App
 
-This contains everything you need to run your app locally.
+Aplicação web desenvolvida em **React** para gerenciamento e visualização de ofertas.  
+Deploy automático via **Vercel** conectado ao GitHub.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1EfU5cnGod5y6yyYmDtkXctyK9Q2Jobw4
+---
 
-## Run Locally
+## 🚀 Rodar e Deploy
 
-**Prerequisites:**  Node.js
+Este projeto contém tudo que você precisa para rodar localmente e publicar no Vercel.
 
+### 🔧 Pré-requisitos
+- Node.js instalado
+- Conta no GitHub conectada ao Vercel
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### ▶️ Rodar localmente
+1. Instale dependências:
+   ```bash
+   npm install
