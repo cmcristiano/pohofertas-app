@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
-  Menu, 
   Instagram, 
   Facebook, 
   Send, 
   Users, 
-  MessageSquare,
   Smartphone,
   Link as LinkIcon,
   Home,
   User,
   ArrowRight,
-  ShoppingBag
+  ShoppingBag,
+  RefreshCw // Ícone de carregar
 } from 'lucide-react';
-import { CATEGORIES, PRODUCTS, SLIDES } from './constants';
+// REMOVI "PRODUCTS" DA IMPORTAÇÃO ABAIXO
+import { CATEGORIES, SLIDES } from './constants'; 
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
@@ -25,6 +25,10 @@ const App = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // NOVO: Estados para os produtos dinâmicos
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Auto-rotate slider
   useEffect(() => {
@@ -34,17 +38,35 @@ const App = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // NOVO: Buscador de Promoções (A Mágica)
+  useEffect(() => {
+    async function fetchPromocoes() {
+      try {
+        // O timestamp (?t=...) força o navegador a não usar cache antigo
+        const response = await fetch('/promocoes.json?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Erro ao carregar');
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Erro ao buscar promoções. Usando lista vazia.", error);
+        setProducts([]); // Se der erro, zera a lista ou mantenha vazio
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPromocoes();
+  }, []);
+
   // Filter Products Logic
-  // 1. Date Validity Check (Auto-Delete)
-  // 2. Category Filter
-  // 3. Search Filter
   const filteredProducts = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return PRODUCTS.filter((product) => {
+    // Agora filtramos a variável de estado "products" e não mais a constante
+    return products.filter((product) => {
       // Auto-Delete check
       const validityDate = new Date(product.validity);
+      // Se a data for inválida ou passada, oculta (opcional, aqui mantive sua lógica)
       if (validityDate < today) return false;
 
       // Category check
@@ -55,7 +77,7 @@ const App = () => {
 
       return true;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, products]);
 
   const handleShare = (product: Product) => {
     setSelectedProduct(product);
@@ -93,17 +115,13 @@ const App = () => {
                  role="img"
                  aria-label="PohOfertas Logo"
                >
-                 {/* Icon Group */}
                  <g transform="translate(0, 5)">
-                    {/* Orange Tag Shape */}
                     <path 
                       d="M5 20C5 14.4772 9.47715 10 15 10H30L50 30L30 50H15C9.47715 50 5 45.5228 5 40V20Z" 
                       fill="#FF6600" 
                       transform="rotate(-15 25 30)"
                     />
-                    {/* Tag Hole */}
                     <circle cx="18" cy="12" r="3" fill="white" transform="rotate(-15 25 30) translate(0, 5)" />
-                    {/* Checkmark inside tag */}
                     <path 
                       d="M18 28L24 34L36 18" 
                       stroke="white" 
@@ -113,8 +131,6 @@ const App = () => {
                       transform="rotate(-5 25 30) translate(2, 2)"
                     />
                  </g>
-                 
-                 {/* Text: PohOfertas */}
                  <text 
                    x="60" 
                    y="36" 
@@ -161,7 +177,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* C) CATEGORY NAVIGATION (Scroll Snap) */}
+        {/* C) CATEGORY NAVIGATION */}
         <nav className="border-t border-gray-100 bg-white py-2 overflow-x-auto hide-scrollbar snap-x cursor-grab">
           <div className="flex px-4 gap-2 min-w-max">
             {CATEGORIES.map((cat) => (
@@ -183,7 +199,7 @@ const App = () => {
         </nav>
       </header>
 
-      {/* D) BANNER ROTATIVO (Slider) */}
+      {/* D) BANNER ROTATIVO */}
       <section className="relative w-full h-[180px] md:h-[320px] overflow-hidden bg-gray-100">
         {SLIDES.map((slide, index) => (
           <div
@@ -209,7 +225,7 @@ const App = () => {
                  </a>
               </div>
               
-              {/* Image with White Background Container */}
+              {/* Image */}
               <div className="w-[40%] h-full flex items-center justify-center relative">
                  <div className="bg-white rounded-full w-32 h-32 md:w-64 md:h-64 flex items-center justify-center shadow-2xl overflow-hidden p-4 transform rotate-3 hover:rotate-0 transition duration-500">
                     <img 
@@ -242,9 +258,17 @@ const App = () => {
           Ofertas em Destaque
         </h2>
 
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">
-            <p>Nenhuma oferta encontrada nesta categoria ou busca.</p>
+        {/* LOADING STATE */}
+        {loading ? (
+           <div className="flex flex-col items-center justify-center py-20 text-gray-400 animate-pulse">
+              <RefreshCw size={40} className="animate-spin mb-4" />
+              <p>Carregando as melhores ofertas...</p>
+           </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-20 text-gray-500 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
+            <ShoppingBag size={40} className="mx-auto mb-3 opacity-20" />
+            <p>Nenhuma oferta encontrada no momento.</p>
+            <p className="text-xs mt-1">Tente outra categoria ou volte em breve!</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
@@ -252,14 +276,13 @@ const App = () => {
               <div 
                 key={product.id}
                 className={`group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden relative card produto-item ${product.category}`}
-                data-validade={product.validity}
               >
                 {/* Discount Tag */}
                 <div className="absolute top-0 left-0 bg-whatsapp text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-br-lg z-10 shadow-sm">
                   {product.discount}% OFF
                 </div>
 
-                {/* Share Floating Button */}
+                {/* Share Button */}
                 <button 
                   onClick={() => handleShare(product)}
                   className="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-secondary shadow-md hover:bg-primary hover:text-white transition z-10"
@@ -274,20 +297,23 @@ const App = () => {
                     alt={product.title} 
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
                     loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=Sem+Imagem';
+                    }}
                   />
                 </div>
 
                 {/* Content */}
                 <div className="p-3 flex flex-col flex-grow">
-                  <h3 className="text-xs md:text-sm font-medium text-gray-700 line-clamp-2 mb-2 h-10">
+                  <h3 className="text-xs md:text-sm font-medium text-gray-700 line-clamp-2 mb-2 h-10" title={product.title}>
                     {product.title}
                   </h3>
                   
                   <div className="mt-auto">
                     {/* Store Indicator */}
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
-                       <ShoppingBag size={12} />
-                       <span>{product.store}</span>
+                        <ShoppingBag size={12} />
+                        <span>{product.store}</span>
                     </div>
 
                     <p className="text-xs text-gray-400 line-through">
@@ -320,15 +346,15 @@ const App = () => {
       <footer className="bg-white border-t border-gray-200 pt-8 pb-24 md:pb-8 mt-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-400 text-xs leading-relaxed max-w-2xl mx-auto mb-4">
-            <strong>Disclaimer:</strong> O PohOfertas é um site parceiro e afiliado. Os preços e a disponibilidade dos produtos podem sofrer alterações sem aviso prévio por parte dos varejistas. Verifique sempre o preço final na loja parceira.
+            <strong>Disclaimer:</strong> O PohOfertas é um site parceiro e afiliado. Os preços e a disponibilidade dos produtos podem sofrer alterações sem aviso prévio.
           </p>
           <div className="text-secondary font-bold text-sm">
-            &copy; 2024 PohOfertas. Todos os direitos reservados.
+            &copy; 2025 PohOfertas.
           </div>
         </div>
       </footer>
 
-      {/* Bottom Nav (Mobile Fixed) */}
+      {/* Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50 pb-safe">
         <button 
           onClick={() => { setActiveCategory('all'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
