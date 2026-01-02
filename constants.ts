@@ -79,6 +79,19 @@ export const PRODUCTS: Product[] = [
     link: 'https://amzn.to/4jiOahM',
     store: 'Amazon'
   },
+    {
+    id: '1767394769018',
+    title: 'Creatina Monohidratada Pura 1kg Dark Lab Unidade Sem sabor',
+    oldPrice: 129,
+    newPrice: 74,
+    image: 'https://http2.mlstatic.com/D_NQ_NP_2X_848860-MLA99964507641_112025-F.webp',
+    store: 'Mercado Livre',
+    category: 'casa',
+    validity: '2027-01-02',
+    discount: 43,
+    link: 'https://mercadolivre.com/sec/1um4YuN'
+  },
+
   {
     id: '1766792995552',
     title: 'Mulheres com Deus - 365 Dias de Fé - Devocional 2026',
