@@ -286,5 +286,29 @@
     "validity": "2026-02-02",
     "discount": 0,
     "link": "https://amzn.to/493CKLk"
+  },
+  {
+    "id": "1767461155495",
+    "title": "Kit Lapiseira Cis Tecnocis 0.7mm Verde Grafite Borracha",
+    "oldPrice": 29.9,
+    "newPrice": 26.91,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_2X_926793-MLU76216992564_052024-F.webp",
+    "store": "Mercado Livre",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 10,
+    "link": "https://mercadolivre.com/sec/2iEb7z6"
+  },
+  {
+    "id": "1767461224708",
+    "title": "Kit Material Escolar Completo Mochila Caderno Lapis Ensino",
+    "oldPrice": 179,
+    "newPrice": 149.9,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_2X_794711-MLB81313824137_122024-F.webp",
+    "store": "Mercado Livre",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 16,
+    "link": "https://mercadolivre.com/sec/1bSMWY2"
   }
 ]
