@@ -12,11 +12,21 @@ import {
   ArrowRight,
   ShoppingBag,
   RefreshCw,
-  Flame 
+  Flame,
+  Tag
 } from 'lucide-react';
-import { CATEGORIES, SLIDES as STATIC_SLIDES } from './constants'; 
+import { CATEGORIES } from './constants'; 
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
+
+// Cores para alternar os slides automaticamente
+const SLIDE_COLORS = [
+  'bg-gradient-to-r from-[#FF6600] to-red-600', // Laranja POH
+  'bg-gradient-to-r from-blue-600 to-indigo-700', // Azul Tech
+  'bg-gradient-to-r from-emerald-500 to-green-700', // Verde Promo
+  'bg-gradient-to-r from-purple-600 to-pink-600', // Roxo Moderno
+  'bg-gradient-to-r from-yellow-500 to-orange-500', // Amarelo Atenção
+];
 
 const App = () => {
   // State
@@ -26,15 +36,14 @@ const App = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
-  // Produtos Dinâmicos (Vindos do Gerador)
+  // Dados
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. BUSCAR DADOS DO JSON (Gerador)
+  // 1. CARREGAMENTO DOS DADOS
   useEffect(() => {
     async function fetchPromocoes() {
       try {
-        // O timestamp força o navegador a pegar sempre a versão nova
         const response = await fetch('/promocoes.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Erro ao carregar');
         const data = await response.json();
@@ -49,68 +58,76 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // 2. LÓGICA DO "SUPER SLIDE" (Maior Desconto Automático)
-  const finalSlides = useMemo(() => {
+  // 2. LÓGICA INTELIGENTE DO CARROSSEL (Top 5 Atuais)
+  const heroSlides = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Filtra produtos válidos
+    // a) Filtra apenas válidos
     const validProducts = products.filter(p => {
         const vDate = new Date(p.validity);
         return vDate >= today;
     });
 
-    // Ordena pelo MAIOR desconto
-    const topDeal = validProducts.sort((a, b) => b.discount - a.discount)[0];
+    // b) Ordena por Maior Desconto
+    const topDeals = validProducts.sort((a, b) => b.discount - a.discount);
 
-    // Se tiver um produto top, cria o slide dele
-    if (topDeal) {
-        const dynamicSlide = {
-            id: 'auto-hero',
-            color: 'bg-gradient-to-r from-red-600 to-orange-600',
-            text: topDeal.title.length > 50 ? topDeal.title.substring(0, 50) + '...' : topDeal.title,
-            sub: `🔥 SUPER OFERTA: ${topDeal.discount}% DE DESCONTO`,
-            img: topDeal.image,
-            link: topDeal.link,
-            isDynamic: true 
-        };
-        // Retorna: Slide Dinâmico + Slides Fixos
-        return [dynamicSlide, ...STATIC_SLIDES];
+    // c) Pega apenas os Top 5
+    const top5 = topDeals.slice(0, 5);
+
+    // d) Se tiver produtos, cria os slides
+    if (top5.length > 0) {
+        return top5.map((p, index) => ({
+            id: p.id,
+            color: SLIDE_COLORS[index % SLIDE_COLORS.length], // Alterna cores
+            text: p.title.length > 60 ? p.title.substring(0, 60) + '...' : p.title,
+            sub: `🔥 ${p.discount}% OFF | Melhor Oferta do Dia`,
+            img: p.image,
+            link: p.link,
+            price: p.newPrice // Para mostrar preço no banner se quiser
+        }));
     }
 
-    // Se não tiver produtos, mostra só os fixos
-    return STATIC_SLIDES;
+    // e) Fallback: Se não tiver NENHUM produto cadastrado/válido
+    return [{
+        id: 'default',
+        color: 'bg-gray-800',
+        text: 'Novas Ofertas Chegando...',
+        sub: 'Fique ligado no nosso Grupo VIP',
+        img: 'https://placehold.co/400x400?text=POH',
+        link: 'https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU'
+    }];
   }, [products]);
 
   // Timer do Slider
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % finalSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000); 
     return () => clearInterval(timer);
-  }, [finalSlides.length]);
+  }, [heroSlides.length]);
 
-  // 3. FILTRO DA GRID DE PRODUTOS
+  // 3. FILTRO DA GRID
   const filteredProducts = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     return products.filter((product) => {
       const validityDate = new Date(product.validity);
-      // Se data inválida ou passada, ignora
-      if (validityDate < today) return false;
+      if (validityDate < today) return false; // Remove vencidos
       
       // Filtro de Categoria
       if (activeCategory !== 'all') {
-         // Se a categoria for "novos" ou "achados", filtramos diferente ou mostramos tudo? 
-         // Para simplificar: se a categoria do produto bater com a selecionada.
-         // Se o produto for 'achados' e o filtro 'achados', bate.
-         if(product.category !== activeCategory) return false;
+         // Lógica flexível: se a categoria for "novos" ou "achados", mostra tudo que for recente?
+         // Por enquanto, correspondência exata ou grupos especiais
+         if (activeCategory === 'novos') {
+            // Exemplo: produtos cadastrados nos últimos 2 dias (opcional, mantendo filtro simples por enquanto)
+            return true; 
+         }
+         if (product.category !== activeCategory && activeCategory !== 'achados') return false;
       }
 
-      // Filtro de Busca
       if (searchQuery && !product.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      
       return true;
     });
   }, [activeCategory, searchQuery, products]);
@@ -121,14 +138,21 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative font-sans">
+      {/* Estilo Global para Barra de Rolagem Bonita */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF6600; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #e65c00; }
+      `}</style>
+
       {/* A) TOP STRIPE */}
       <div className="bg-secondary text-white text-xs py-1.5 px-3 flex justify-between items-center z-50 relative">
         <span className="font-semibold hidden sm:inline">Site Oficial PohOfertas</span>
         <span className="font-semibold sm:hidden">PohOfertas Oficial</span>
         <div className="flex items-center gap-3">
           <a href="https://www.instagram.com/pohachadinhos/" target="_blank" rel="noreferrer" className="hover:text-primary transition"><Instagram size={14} /></a>
-          <a href="https://www.facebook.com/PohAchadinhos" target="_blank" rel="noreferrer" className="hover:text-primary transition"><Facebook size={14} /></a>
           <a href="https://t.me/+hqy-4LbvlpRhZGEx" target="_blank" rel="noreferrer" className="hover:text-primary transition"><Send size={14} /></a>
           <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" rel="noreferrer" className="flex items-center gap-1 text-whatsapp font-bold hover:underline">
             <Users size={14} /> <span className="hidden xs:inline">Grupo VIP</span>
@@ -141,13 +165,14 @@ const App = () => {
         <div className="container mx-auto px-4 pt-3 pb-2">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
-               <svg viewBox="0 0 260 50" className="w-[180px] md:w-[210px] h-[40px] md:h-[50px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+               {/* Logo */}
+               <svg viewBox="0 0 260 50" className="w-[160px] md:w-[210px] h-[35px] md:h-[50px]" fill="none" xmlns="http://www.w3.org/2000/svg">
                  <g transform="translate(0, 5)">
                     <path d="M5 20C5 14.4772 9.47715 10 15 10H30L50 30L30 50H15C9.47715 50 5 45.5228 5 40V20Z" fill="#FF6600" transform="rotate(-15 25 30)"/>
                     <circle cx="18" cy="12" r="3" fill="white" transform="rotate(-15 25 30) translate(0, 5)" />
                     <path d="M18 28L24 34L36 18" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" transform="rotate(-5 25 30) translate(2, 2)"/>
                  </g>
-                 <text x="60" y="36" fontFamily="'Segoe UI', Roboto, sans-serif" fontWeight="800" fontSize="32" fill="#0A192F" letterSpacing="-0.5">PohOfertas</text>
+                 <text x="60" y="36" fontFamily="Segoe UI, sans-serif" fontWeight="800" fontSize="32" fill="#0A192F" letterSpacing="-0.5">PohOfertas</text>
                </svg>
             </div>
             <a href="https://wa.me/5511999999999" target="_blank" rel="noreferrer" className="bg-whatsapp text-white px-3 py-1.5 rounded-full font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:shadow-md transition active:scale-95">
@@ -167,26 +192,31 @@ const App = () => {
           </div>
         </div>
 
-        {/* C) CATEGORY NAV */}
-        <nav className="border-t border-gray-100 bg-white py-2 overflow-x-auto hide-scrollbar snap-x cursor-grab">
-          <div className="flex px-4 gap-2 min-w-max">
+        {/* C) CATEGORY NAV (CORRIGIDA) */}
+        {/* Adicionei 'custom-scrollbar' e 'pb-2' para dar espaço e mostrar a barra */}
+        <nav className="border-t border-gray-100 bg-white py-2 overflow-x-auto custom-scrollbar snap-x cursor-grab w-full">
+          <div className="flex px-4 gap-3 min-w-max pb-2">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`snap-start flex flex-col items-center justify-center min-w-[70px] py-1.5 rounded-lg transition-all ${activeCategory === cat.id ? 'bg-secondary text-white shadow-md scale-105' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                className={`snap-start flex flex-col items-center justify-center min-w-[72px] py-2 rounded-lg transition-all border ${
+                  activeCategory === cat.id 
+                    ? 'bg-secondary text-white border-secondary shadow-md scale-105' 
+                    : 'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 hover:border-gray-200'
+                }`}
               >
-                <span className="text-lg mb-0.5">{cat.icon}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wide">{cat.label}</span>
+                <span className="text-xl mb-1">{cat.icon}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide px-1 truncate max-w-[80px]">{cat.label}</span>
               </button>
             ))}
           </div>
         </nav>
       </header>
 
-      {/* D) BANNER ROTATIVO */}
-      <section className="relative w-full h-[180px] md:h-[320px] overflow-hidden bg-gray-100">
-        {finalSlides.map((slide, index) => (
+      {/* D) CARROSSEL INTELIGENTE (TOP 5) */}
+      <section className="relative w-full h-[200px] md:h-[340px] overflow-hidden bg-gray-100">
+        {heroSlides.map((slide, index) => (
           <div
             key={slide.id}
             className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
@@ -194,46 +224,47 @@ const App = () => {
             } ${slide.color}`}
           >
             <div className="container mx-auto h-full px-6 md:px-12 flex items-center justify-between">
+              {/* Texto */}
               <div className="flex flex-col items-start text-white w-[60%] z-10">
-                 {/* @ts-ignore */}
-                 {slide.isDynamic && (
-                   <span className="bg-white text-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-2 flex items-center gap-1 animate-pulse">
-                     <Flame size={12} fill="currentColor" /> Destaque do Dia
-                   </span>
-                 )}
-                 <h2 className="text-2xl md:text-5xl font-black drop-shadow-md mb-2 leading-tight line-clamp-2">
+                 <span className="bg-white/20 text-white border border-white/40 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold uppercase mb-2 flex items-center gap-1 backdrop-blur-md">
+                   <Flame size={12} fill="currentColor" className="text-yellow-300" /> Destaque Top {index + 1}
+                 </span>
+                 
+                 <h2 className="text-xl md:text-4xl font-black drop-shadow-md mb-2 leading-tight line-clamp-2">
                    {slide.text}
                  </h2>
-                 <p className="text-xs md:text-xl font-medium bg-black/20 px-3 py-1 rounded-lg mb-4 backdrop-blur-sm">
+                 <p className="text-xs md:text-lg font-medium bg-black/20 px-3 py-1 rounded-lg mb-4 backdrop-blur-sm line-clamp-1">
                    {slide.sub}
                  </p>
                  <a 
                    href={slide.link}
                    target="_blank" rel="noreferrer"
-                   className="bg-white text-secondary hover:bg-gray-100 font-bold py-1.5 px-4 md:py-2 md:px-6 rounded-full text-xs md:text-sm shadow-lg transition transform hover:scale-105 flex items-center gap-1"
+                   className="bg-white text-secondary hover:bg-gray-100 font-bold py-2 px-5 md:py-3 md:px-8 rounded-full text-xs md:text-sm shadow-xl transition transform hover:scale-105 flex items-center gap-1"
                  >
-                   Ver Agora <ArrowRight size={14} />
+                   Ver Oferta <ArrowRight size={14} />
                  </a>
               </div>
               
+              {/* Imagem */}
               <div className="w-[40%] h-full flex items-center justify-center relative">
-                 <div className="bg-white rounded-full w-32 h-32 md:w-64 md:h-64 flex items-center justify-center shadow-2xl overflow-hidden p-4 transform rotate-3 hover:rotate-0 transition duration-500">
+                 <div className="bg-white rounded-full w-32 h-32 md:w-72 md:h-72 flex items-center justify-center shadow-2xl overflow-hidden p-4 transform rotate-3 hover:rotate-0 transition duration-500 ring-4 ring-white/30">
                     <img 
                       src={slide.img} 
                       alt={slide.text} 
                       className="w-full h-full object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/400?text=Oferta'; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/400?text=POH'; }}
                     />
                  </div>
               </div>
             </div>
 
+            {/* Dots */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-               {finalSlides.map((_, i) => (
+               {heroSlides.map((_, i) => (
                  <button 
                   key={i}
                   onClick={() => setCurrentSlide(i)}
-                  className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-white w-6' : 'bg-white/50 w-2'}`} 
+                  className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-white w-8' : 'bg-white/40 w-2'}`} 
                  />
                ))}
             </div>
@@ -242,51 +273,58 @@ const App = () => {
       </section>
 
       {/* E) GRID DE PRODUTOS */}
-      <main className="container mx-auto px-4 py-6">
-        <h2 className="text-lg font-bold text-secondary mb-4 flex items-center gap-2">
-          <span className="bg-primary w-1 h-6 rounded-r"></span>
-          Ofertas em Destaque
+      <main className="container mx-auto px-4 py-8">
+        <h2 className="text-xl font-bold text-secondary mb-6 flex items-center gap-2 border-b pb-2">
+          <Tag className="text-primary" size={20} />
+          Ofertas do Momento
         </h2>
 
         {loading ? (
            <div className="flex flex-col items-center justify-center py-20 text-gray-400 animate-pulse">
-              <RefreshCw size={40} className="animate-spin mb-4" />
-              <p>Buscando as melhores ofertas...</p>
+              <RefreshCw size={40} className="animate-spin mb-4 text-primary" />
+              <p>Buscando descontos...</p>
            </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 text-gray-500 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
-            <ShoppingBag size={40} className="mx-auto mb-3 opacity-20" />
-            <p>Nenhuma oferta encontrada nesta categoria.</p>
+            <ShoppingBag size={48} className="mx-auto mb-3 opacity-20" />
+            <p className="font-medium">Nenhuma oferta encontrada nesta seção.</p>
+            <p className="text-sm mt-1">Tente mudar o filtro ou volte mais tarde!</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {filteredProducts.map((product) => (
-              <div key={product.id} className={`group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden relative card produto-item ${product.category}`}>
+              <div key={product.id} className={`group bg-white rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden relative`}>
                 
-                <div className="absolute top-0 left-0 bg-whatsapp text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-br-lg z-10 shadow-sm">
+                {/* Badge Desconto */}
+                <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-br-lg z-10 shadow-sm">
                   {product.discount}% OFF
                 </div>
 
+                {/* Botão Share */}
                 <button onClick={() => handleShare(product)} className="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-secondary shadow-md hover:bg-primary hover:text-white transition z-10">
                   <LinkIcon size={16} />
                 </button>
 
-                <div className="w-full aspect-square p-4 bg-white flex items-center justify-center relative overflow-hidden">
+                {/* Imagem */}
+                <div className="w-full aspect-square p-5 bg-white flex items-center justify-center relative">
                   <img src={product.image} alt={product.title} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" loading="lazy" onError={(e) => {(e.target as HTMLImageElement).src = 'https://placehold.co/200?text=Sem+Img';}} />
                 </div>
 
-                <div className="p-3 flex flex-col flex-grow">
-                  <h3 className="text-xs md:text-sm font-medium text-gray-700 line-clamp-2 mb-2 h-10" title={product.title}>{product.title}</h3>
+                {/* Info */}
+                <div className="p-3 flex flex-col flex-grow border-t border-gray-50">
+                  <h3 className="text-xs md:text-sm font-medium text-gray-800 line-clamp-2 mb-2 h-9 leading-tight" title={product.title}>{product.title}</h3>
                   <div className="mt-auto">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
-                        <ShoppingBag size={12} /><span>{product.store}</span>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                        <ShoppingBag size={10} /><span>{product.store}</span>
                     </div>
                     <p className="text-xs text-gray-400 line-through">R$ {product.oldPrice.toFixed(2).replace('.', ',')}</p>
                     <div className="flex items-baseline gap-1 mb-3">
-                      <span className="text-xs text-secondary">R$</span>
+                      <span className="text-xs text-secondary font-bold">R$</span>
                       <span className="text-xl md:text-2xl font-black text-secondary">{product.newPrice.toFixed(2).replace('.', ',')}</span>
                     </div>
-                    <a href={product.link} target="_blank" rel="noreferrer" className="w-full block text-center bg-primary text-white font-bold py-2 rounded-lg text-sm hover:bg-orange-600 transition shadow-md active:scale-95">VER OFERTA</a>
+                    <a href={product.link} target="_blank" rel="noreferrer" className="w-full block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm transition shadow-md active:scale-95">
+                      PEGAR PROMOÇÃO
+                    </a>
                   </div>
                 </div>
               </div>
@@ -297,12 +335,13 @@ const App = () => {
 
       <footer className="bg-white border-t border-gray-200 pt-8 pb-24 md:pb-8 mt-8">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-400 text-xs max-w-2xl mx-auto mb-4"><strong>Disclaimer:</strong> O PohOfertas é um site parceiro. Preços sujeitos a alteração.</p>
+          <p className="text-gray-400 text-xs max-w-2xl mx-auto mb-4"><strong>Aviso:</strong> O PohOfertas é um agregador de promoções. Preços e disponibilidade sujeitos a alteração pelas lojas.</p>
           <div className="text-secondary font-bold text-sm">&copy; 2025 PohOfertas.</div>
         </div>
       </footer>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50 pb-safe">
+      {/* Menu Mobile */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <button onClick={() => { setActiveCategory('all'); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex flex-col items-center text-primary">
           <Home size={22} /><span className="text-[10px] font-medium mt-1">Início</span>
         </button>
