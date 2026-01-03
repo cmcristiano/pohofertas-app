@@ -12,7 +12,7 @@ import {
   ArrowRight,
   ShoppingBag,
   RefreshCw,
-  Flame // Ícone de fogo para o destaque
+  Flame 
 } from 'lucide-react';
 import { CATEGORIES, SLIDES as STATIC_SLIDES } from './constants'; 
 import { Product } from './types';
@@ -26,7 +26,7 @@ const App = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
-  // Produtos Dinâmicos
+  // Produtos Dinâmicos (Vindos do Gerador)
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +34,7 @@ const App = () => {
   useEffect(() => {
     async function fetchPromocoes() {
       try {
+        // O timestamp força o navegador a pegar sempre a versão nova
         const response = await fetch('/promocoes.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Erro ao carregar');
         const data = await response.json();
@@ -48,7 +49,7 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // 2. LÓGICA DO "SUPER SLIDE" (Automático)
+  // 2. LÓGICA DO "SUPER SLIDE" (Maior Desconto Automático)
   const finalSlides = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -66,12 +67,12 @@ const App = () => {
     if (topDeal) {
         const dynamicSlide = {
             id: 'auto-hero',
-            color: 'bg-gradient-to-r from-red-600 to-orange-600', // Cor de destaque "Fogo"
+            color: 'bg-gradient-to-r from-red-600 to-orange-600',
             text: topDeal.title.length > 50 ? topDeal.title.substring(0, 50) + '...' : topDeal.title,
-            sub: `🔥 OPORTUNIDADE: ${topDeal.discount}% DE DESCONTO`,
+            sub: `🔥 SUPER OFERTA: ${topDeal.discount}% DE DESCONTO`,
             img: topDeal.image,
             link: topDeal.link,
-            isDynamic: true // Marcador pra gente saber que é oferta
+            isDynamic: true 
         };
         // Retorna: Slide Dinâmico + Slides Fixos
         return [dynamicSlide, ...STATIC_SLIDES];
@@ -81,11 +82,11 @@ const App = () => {
     return STATIC_SLIDES;
   }, [products]);
 
-  // Timer do Slider (Reseta quando os slides mudam)
+  // Timer do Slider
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % finalSlides.length);
-    }, 5000); // Aumentei pra 5s pra dar tempo de ler
+    }, 5000); 
     return () => clearInterval(timer);
   }, [finalSlides.length]);
 
@@ -96,9 +97,20 @@ const App = () => {
 
     return products.filter((product) => {
       const validityDate = new Date(product.validity);
+      // Se data inválida ou passada, ignora
       if (validityDate < today) return false;
-      if (activeCategory !== 'all' && product.category !== activeCategory) return false;
+      
+      // Filtro de Categoria
+      if (activeCategory !== 'all') {
+         // Se a categoria for "novos" ou "achados", filtramos diferente ou mostramos tudo? 
+         // Para simplificar: se a categoria do produto bater com a selecionada.
+         // Se o produto for 'achados' e o filtro 'achados', bate.
+         if(product.category !== activeCategory) return false;
+      }
+
+      // Filtro de Busca
       if (searchQuery && !product.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      
       return true;
     });
   }, [activeCategory, searchQuery, products]);
@@ -129,7 +141,6 @@ const App = () => {
         <div className="container mx-auto px-4 pt-3 pb-2">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
-               {/* Logo SVG */}
                <svg viewBox="0 0 260 50" className="w-[180px] md:w-[210px] h-[40px] md:h-[50px]" fill="none" xmlns="http://www.w3.org/2000/svg">
                  <g transform="translate(0, 5)">
                     <path d="M5 20C5 14.4772 9.47715 10 15 10H30L50 30L30 50H15C9.47715 50 5 45.5228 5 40V20Z" fill="#FF6600" transform="rotate(-15 25 30)"/>
@@ -173,7 +184,7 @@ const App = () => {
         </nav>
       </header>
 
-      {/* D) BANNER ROTATIVO (AGORA AUTOMÁTICO) */}
+      {/* D) BANNER ROTATIVO */}
       <section className="relative w-full h-[180px] md:h-[320px] overflow-hidden bg-gray-100">
         {finalSlides.map((slide, index) => (
           <div
@@ -183,16 +194,13 @@ const App = () => {
             } ${slide.color}`}
           >
             <div className="container mx-auto h-full px-6 md:px-12 flex items-center justify-between">
-              {/* Texto */}
               <div className="flex flex-col items-start text-white w-[60%] z-10">
-                 {/* Badge especial se for oferta automática */}
                  {/* @ts-ignore */}
                  {slide.isDynamic && (
                    <span className="bg-white text-red-600 px-2 py-0.5 rounded text-[10px] font-black uppercase mb-2 flex items-center gap-1 animate-pulse">
-                     <Flame size={12} fill="currentColor" /> Maior Desconto
+                     <Flame size={12} fill="currentColor" /> Destaque do Dia
                    </span>
                  )}
-                 
                  <h2 className="text-2xl md:text-5xl font-black drop-shadow-md mb-2 leading-tight line-clamp-2">
                    {slide.text}
                  </h2>
@@ -208,7 +216,6 @@ const App = () => {
                  </a>
               </div>
               
-              {/* Imagem */}
               <div className="w-[40%] h-full flex items-center justify-center relative">
                  <div className="bg-white rounded-full w-32 h-32 md:w-64 md:h-64 flex items-center justify-center shadow-2xl overflow-hidden p-4 transform rotate-3 hover:rotate-0 transition duration-500">
                     <img 
@@ -221,7 +228,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* Dots */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                {finalSlides.map((_, i) => (
                  <button 
@@ -250,7 +256,7 @@ const App = () => {
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 text-gray-500 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
             <ShoppingBag size={40} className="mx-auto mb-3 opacity-20" />
-            <p>Nenhuma oferta ativa no momento.</p>
+            <p>Nenhuma oferta encontrada nesta categoria.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
@@ -289,7 +295,6 @@ const App = () => {
         )}
       </main>
 
-      {/* F) FOOTER & NAV MOBILE (Igual ao anterior) */}
       <footer className="bg-white border-t border-gray-200 pt-8 pb-24 md:pb-8 mt-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-400 text-xs max-w-2xl mx-auto mb-4"><strong>Disclaimer:</strong> O PohOfertas é um site parceiro. Preços sujeitos a alteração.</p>
