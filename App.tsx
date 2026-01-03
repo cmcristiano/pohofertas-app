@@ -1,30 +1,32 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home, User, 
-  ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight 
+  ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight,
+  ShoppingBag, Zap, Monitor, Coffee, Home as HomeIcon, Sparkles
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
 // --- CONFIGURAÇÃO DAS CATEGORIAS ---
 const LOCAL_CATEGORIES = [
-  { id: 'all', label: 'Tudo' },
-  { id: 'volta-aulas', label: '✏️ Volta às Aulas' },
-  { id: 'novos', label: 'Novidades' },
-  { id: 'achados', label: 'Achadinhos' },
-  { id: 'papelaria', label: 'Papelaria' },
-  { id: 'tech', label: 'Tecnologia' },
-  { id: 'cozinha', label: 'Cozinha' },
-  { id: 'casa', label: 'Casa' },
-  { id: 'beleza', label: 'Beleza' },
+  { id: 'all', label: 'Tudo', icon: <ShoppingBag size={14}/> },
+  { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
+  { id: 'achados', label: 'Achadinhos', banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', title: 'Achadinhos Imperdíveis', sub: 'As melhores ofertas da Shopee e Amazon 🔥' },
+  { id: 'tech', label: 'Tecnologia', banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', title: 'Mundo Tech', sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' },
+  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
+  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
+  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
   { id: 'livros', label: 'Livros' },
   { id: 'moda', label: 'Moda' },
   { id: 'bebes', label: 'Infantil' },
   { id: 'games', label: 'Games' },
+  { id: 'saude', label: 'Saúde' },
+  { id: 'esportes', label: 'Esportes' },
+  { id: 'pets', label: 'Pets' },
 ];
 
 const SLIDE_COLORS = [
-  'bg-gradient-to-r from-yellow-500 to-orange-500',
+  'bg-gradient-to-r from-orange-600 to-orange-500', // Padrão POH
   'bg-gradient-to-r from-blue-600 to-indigo-700',   
   'bg-gradient-to-r from-emerald-500 to-green-700',
   'bg-gradient-to-r from-purple-600 to-pink-600', 
@@ -56,21 +58,51 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
+  // --- LÓGICA INTELIGENTE DOS SLIDES ---
   const heroSlides = useMemo(() => {
-    const specialSlide = {
-        id: 'school-promo', color: SLIDE_COLORS[0],
-        text: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒',
-        img: '/banner-escola.jpg', link: '#' 
+    // 1. Encontra a configuração da categoria atual
+    const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
+    
+    // 2. Define o Slide Principal (Hero) baseado na categoria
+    let mainSlide = {
+        id: 'main-hero', 
+        color: SLIDE_COLORS[0],
+        text: currentCatConfig.title || 'As Melhores Ofertas', 
+        sub: currentCatConfig.sub || 'Garimpadas diariamente para você 🧡',
+        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', // Banner padrão se não tiver
+        link: '#promo-list',
+        isFullBanner: true // Nova flag para ativar o modo "Outdoor"
     };
+
+    // 3. Pega produtos destaque para os próximos slides
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const valid = products.filter(p => new Date(p.validity) >= today);
-    const top4 = valid.sort((a, b) => b.discount - a.discount).slice(0, 4);
-    const generatedSlides = top4.map((p, i) => ({
-        id: p.id, color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
-        text: p.title, sub: `🔥 ${p.discount}% OFF | Oferta Relâmpago`, img: p.image, link: p.link
+    
+    // Filtra produtos da categoria atual (se não for "Tudo" ou "Volta as Aulas" que mostra mix)
+    let categoryProducts = valid;
+    if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados' && activeCategory !== 'volta-aulas') {
+        categoryProducts = valid.filter(p => p.category === activeCategory);
+    }
+    
+    // Pega os Top 4 descontos
+    const top4 = categoryProducts.sort((a, b) => b.discount - a.discount).slice(0, 4);
+    
+    const productSlides = top4.map((p, i) => ({
+        id: p.id, 
+        color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
+        text: p.title, 
+        sub: `🔥 ${p.discount}% OFF | Oferta Relâmpago`, 
+        img: p.image, 
+        link: p.link,
+        isFullBanner: false // Produtos continuam com layout lateral
     }));
-    return [specialSlide, ...generatedSlides];
-  }, [products]);
+
+    // Se não tiver produtos na categoria, mostra só o banner principal
+    return [mainSlide, ...productSlides];
+  }, [products, activeCategory]);
+
+  // Reseta o slide para 0 quando muda de categoria
+  useEffect(() => { setCurrentSlide(0); }, [activeCategory]);
 
   const nextSlide = useCallback(() => { setCurrentSlide((prev) => (prev + 1) % heroSlides.length); }, [heroSlides.length]);
   const prevSlide = useCallback(() => { setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1)); }, [heroSlides.length]);
@@ -91,6 +123,7 @@ const App = () => {
     });
   }, [activeCategory, searchQuery, products]);
 
+  // ... (Funções de Form e Share mantidas iguais) ...
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
@@ -124,7 +157,7 @@ const App = () => {
 
       {/* TOP STRIPE */}
       <div className="bg-secondary text-white text-[10px] py-1 px-3 flex justify-between items-center z-50">
-        <span className="font-bold">VOLTA ÀS AULAS POH 🎒</span>
+        <span className="font-bold">OFERTAS SELECIONADAS POR CRIS MELLO 🧡</span>
         <div className="flex gap-3"><Instagram size={12}/><Facebook size={12}/></div>
       </div>
 
@@ -143,7 +176,7 @@ const App = () => {
           </div>
           <div className="relative w-full">
             <input className="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-full text-sm focus:bg-white focus:ring-1 focus:ring-primary outline-none transition" 
-                   placeholder="O que você procura hoje?" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                   placeholder="Busque por produto, marca ou categoria..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           </div>
         </div>
@@ -151,81 +184,106 @@ const App = () => {
           <div className="flex gap-2 min-w-max pr-4">
             {LOCAL_CATEGORIES.map((cat) => {
               const isActive = activeCategory === cat.id; const isSpecial = cat.id === 'volta-aulas';
-              return ( <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${isActive ? (isSpecial ? 'bg-yellow-400 text-black border-yellow-500 shadow-md' : 'bg-secondary text-white border-secondary') : (isSpecial ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')}`}>{cat.label}</button> );
+              return ( <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1 ${isActive ? (isSpecial ? 'bg-yellow-400 text-black border-yellow-500 shadow-md' : 'bg-secondary text-white border-secondary') : (isSpecial ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')}`}>{cat.label}</button> );
             })}
           </div>
         </nav>
       </header>
 
-      {/* CARROSSEL INTERATIVO (FULL BANNER) */}
+      {/* CARROSSEL INTELIGENTE (ADAPTA O FUNDO POR CATEGORIA) */}
       {heroSlides.length > 0 && (
         <section className="relative w-full h-[180px] md:h-[300px] overflow-hidden bg-gray-200 group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           {heroSlides.map((slide, index) => {
-            const isSpecialSlide = slide.id === 'school-promo';
+            // Verifica se é um Banner Full (Outdoor) ou Slide de Produto Normal
+            const isFullBanner = slide.isFullBanner;
+            
             return (
             <div key={slide.id} className={`absolute inset-0 transition-opacity duration-700 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'} ${slide.color}`}>
               
-              {/* SE FOR O SLIDE ESPECIAL, A IMAGEM VIRA FUNDO */}
-              {isSpecialSlide && (
+              {/* MODO OUTDOOR (Fundo Total) */}
+              {isFullBanner && (
                 <>
-                  <img src={slide.img} alt={slide.text} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/167/167707.png'; }}/>
-                  <div className="absolute inset-0 bg-black/30"></div> {/* Overlay para leitura */}
+                  <img src={slide.img} alt={slide.text} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070'; }}/>
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div> {/* Degradê elegante para leitura */}
                 </>
               )}
 
               <div className="container mx-auto h-full px-6 flex items-center justify-between relative z-20">
-                <div className={`flex flex-col items-start text-white ${isSpecialSlide ? 'w-full md:w-[80%]' : 'w-[65%] md:w-[70%]'} z-10`}>
-                   <span className="bg-black/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 backdrop-blur-md">
-                     {index === 0 ? '🔔 ATENÇÃO PAIS' : `TOP ${index} DO DIA`}
+                <div className={`flex flex-col items-start text-white ${isFullBanner ? 'w-full md:w-[60%]' : 'w-[65%] md:w-[70%]'} z-10`}>
+                   
+                   {/* BADGE (Etiqueta acima do título) */}
+                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 backdrop-blur-md ${isFullBanner ? 'bg-primary text-white' : 'bg-black/20'}`}>
+                     {index === 0 ? `✨ ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label || 'DESTAQUE'}` : `TOP ${index} DO DIA`}
                    </span>
-                   <h2 className="text-lg md:text-4xl font-black leading-tight line-clamp-2 mb-1 drop-shadow-lg">{slide.text}</h2>
-                   <p className="text-xs md:text-lg opacity-90 mb-3 line-clamp-1 drop-shadow-md">{slide.sub}</p>
-                   <a href={slide.link} target="_blank" rel="noreferrer" className="bg-white text-black font-bold py-1.5 px-4 rounded-full text-xs shadow-lg hover:scale-105 transition flex items-center gap-1">
-                     VER AGORA <ArrowRight size={12} />
+
+                   <h2 className="text-xl md:text-5xl font-black leading-tight line-clamp-2 mb-2 drop-shadow-lg">{slide.text}</h2>
+                   <p className="text-xs md:text-xl opacity-90 mb-4 line-clamp-2 drop-shadow-md font-medium">{slide.sub}</p>
+                   
+                   <a href={slide.link} target="_blank" rel="noreferrer" className="bg-white text-black font-bold py-2 px-6 rounded-full text-xs md:text-sm shadow-lg hover:scale-105 transition flex items-center gap-2">
+                     VER AGORA <ArrowRight size={14} />
                    </a>
                 </div>
                 
-                {/* IMAGEM LATERAL (SÓ PARA SLIDES NORMAIS) */}
-                {!isSpecialSlide && (
-                  <div className="w-[35%] md:w-[30%] flex justify-center h-full py-4">
-                    <img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl" onError={(e)=>{(e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png'}}/>
+                {/* MODO PRODUTO (Imagem Lateral flutuando) */}
+                {!isFullBanner && (
+                  <div className="w-[35%] md:w-[30%] flex justify-center h-full py-4 relative">
+                     {/* Efeito de brilho atrás do produto */}
+                    <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full transform scale-75"></div>
+                    <img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl relative z-10 transform hover:scale-110 transition duration-500" onError={(e)=>{(e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png'}}/>
                   </div>
                 )}
               </div>
             </div>
           )})}
           
-          <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-1 md:p-2 rounded-full hover:bg-black/50 transition z-20 md:opacity-0 group-hover:opacity-100"><ChevronLeft size={24} /></button>
-          <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-1 md:p-2 rounded-full hover:bg-black/50 transition z-20 md:opacity-0 group-hover:opacity-100"><ChevronRight size={24} /></button>
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-             {heroSlides.map((_, i) => (<button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-white w-6' : 'bg-white/40 w-2 hover:bg-white/70'}`} />))}
+          {/* Navegação */}
+          <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition z-20 opacity-0 group-hover:opacity-100"><ChevronLeft size={24} /></button>
+          <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition z-20 opacity-0 group-hover:opacity-100"><ChevronRight size={24} /></button>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+             {heroSlides.map((_, i) => (<button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-primary w-8' : 'bg-white/50 w-2 hover:bg-white/80'}`} />))}
           </div>
         </section>
       )}
 
-      {/* GRID */}
-      <main className="container mx-auto px-4 py-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          {activeCategory === 'volta-aulas' ? '🎒 Material Escolar & Tech' : '🔥 Melhores Ofertas'}
-        </h2>
-        {loading ? <div className="text-center py-10"><RefreshCw className="animate-spin mx-auto text-primary"/></div> : 
-         filteredProducts.length === 0 ? <div className="text-center py-10 text-gray-400">Sem ofertas nesta categoria.</div> : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* GRID DE PRODUTOS */}
+      <main className="container mx-auto px-4 py-8" id="promo-list">
+        <div className="flex items-center gap-2 mb-6">
+            <Zap className="text-primary animate-pulse" size={20}/>
+            <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">
+              {activeCategory === 'all' ? '🔥 Ofertas Quentes' : `Melhores de ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label}`}
+            </h2>
+        </div>
+        
+        {loading ? <div className="text-center py-20"><RefreshCw className="animate-spin mx-auto text-primary mb-2"/><p className="text-gray-400 text-sm">Carregando ofertas...</p></div> : 
+         filteredProducts.length === 0 ? <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300"><ShoppingBag className="mx-auto text-gray-300 mb-2" size={40}/><p className="text-gray-400">Nenhuma oferta encontrada nesta categoria hoje.</p></div> : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {filteredProducts.map((p) => (
-              <div key={p.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden relative group">
-                {p.discount > 0 && <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-br z-10">{p.discount}%</div>}
-                <button onClick={() => handleShare(p)} className="absolute top-1 right-1 bg-white/80 p-1.5 rounded-full text-gray-600 hover:text-primary z-10"><LinkIcon size={14}/></button>
-                <div className="w-full h-40 bg-white p-4 flex items-center justify-center border-b border-gray-50">
-                  <img src={p.image} className="max-h-full max-w-full object-contain group-hover:scale-105 transition" loading="lazy" onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/150'}}/>
+              <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition duration-300">
+                {p.discount > 0 && <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-br z-10 shadow-sm">{p.discount}% OFF</div>}
+                
+                <button onClick={() => handleShare(p)} className="absolute top-2 right-2 bg-gray-100 p-2 rounded-full text-gray-500 hover:text-primary hover:bg-orange-50 transition z-10"><LinkIcon size={14}/></button>
+                
+                <div className="w-full h-48 bg-white p-6 flex items-center justify-center border-b border-gray-50 group-hover:bg-gray-50 transition">
+                  <img src={p.image} className="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-500" loading="lazy" onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/150'}}/>
                 </div>
-                <div className="p-3">
-                  <h3 className="text-xs font-medium text-gray-700 line-clamp-2 h-8 mb-2 leading-tight">{p.title}</h3>
-                  <div className="flex items-center gap-1 mb-1"><Tag size={10} className="text-gray-400"/><span className="text-[10px] text-gray-400 uppercase">{p.store}</span></div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xs text-gray-400 line-through">R$ {p.oldPrice.toFixed(0)}</span>
-                    <span className="text-lg font-black text-gray-900">R$ {p.newPrice.toFixed(2)}</span>
+                
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 px-1.5 py-0.5 rounded">{p.store}</span>
+                     {p.category === 'volta-aulas' && <span className="text-[10px] text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded font-bold">ESCOLA</span>}
                   </div>
-                  <a href={p.link} target="_blank" className="block text-center bg-primary text-white font-bold text-xs py-2 rounded mt-2 hover:bg-orange-600 transition">COMPRAR</a>
+                  
+                  <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 h-10 mb-2 leading-tight group-hover:text-primary transition">{p.title}</h3>
+                  
+                  <div className="flex flex-col mb-3">
+                    {p.oldPrice > 0 && <span className="text-xs text-gray-400 line-through">R$ {p.oldPrice.toFixed(2)}</span>}
+                    <span className="text-xl font-black text-gray-900">R$ {p.newPrice.toFixed(2)}</span>
+                    {p.oldPrice > 0 && <span className="text-[10px] text-green-600 font-medium">Economia de R$ {(p.oldPrice - p.newPrice).toFixed(2)}</span>}
+                  </div>
+                  
+                  <a href={p.link} target="_blank" className="block text-center bg-gray-900 text-white font-bold text-xs py-2.5 rounded-lg hover:bg-primary transition shadow-sm hover:shadow-lg transform active:scale-95">
+                      PEGAR PROMOÇÃO
+                  </a>
                 </div>
               </div>
             ))}
@@ -233,33 +291,52 @@ const App = () => {
         )}
       </main>
 
-      {/* CLUBE VIP */}
-      <section className="bg-secondary text-white py-10 mt-8 px-4">
-         <div className="max-w-xl mx-auto text-center">
-            <div className="inline-block bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold mb-3">CLUBE POH VIP</div>
-            <h2 className="text-2xl font-black mb-2">Ofertas no seu Zap 📲</h2>
-            <p className="text-sm text-gray-300 mb-6">Cadastre-se para receber a lista de material escolar com desconto.</p>
+      {/* CLUBE VIP (RODAPÉ) */}
+      <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden">
+         {/* Detalhes de fundo */}
+         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+         
+         <div className="max-w-xl mx-auto text-center relative z-10">
+            <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border border-white/20">
+                <Sparkles size={12} className="text-yellow-400"/> CLUBE POH VIP
+            </div>
+            <h2 className="text-3xl font-black mb-3">Ofertas no seu Zap 📲</h2>
+            <p className="text-gray-300 mb-8 leading-relaxed">Não perca tempo procurando. Nossa equipe garimpa os melhores preços e manda direto no seu celular. Sem spam, só desconto real.</p>
+            
             {formStatus === 'success' ? (
-                <div className="bg-green-500/20 p-4 rounded border border-green-500 text-green-200 flex flex-col items-center"><CheckCircle className="mb-2"/><span>Cadastrado! Fique de olho.</span></div>
+                <div className="bg-green-500/20 p-6 rounded-xl border border-green-500/50 text-green-200 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+                    <CheckCircle size={32} className="mb-2 text-green-400"/>
+                    <span className="font-bold text-lg">Sucesso!</span>
+                    <span className="text-sm">Você já está na lista VIP. Fique de olho!</span>
+                </div>
             ) : (
-                <form onSubmit={handleLeadSubmit} className="space-y-3">
-                    <input type="text" placeholder="Nome" required value={leadForm.name} onChange={e=>setLeadForm({...leadForm, name: e.target.value})} className="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white text-sm focus:border-primary outline-none"/>
-                    <input type="email" placeholder="Email" required value={leadForm.email} onChange={e=>setLeadForm({...leadForm, email: e.target.value})} className="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white text-sm focus:border-primary outline-none"/>
-                    <input type="tel" placeholder="(DD) 9xxxx-xxxx" required value={leadForm.phone} onChange={handlePhoneChange} className="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white text-sm focus:border-primary outline-none"/>
-                    <button type="submit" disabled={formStatus==='sending'} className="w-full bg-primary py-2.5 rounded font-bold text-sm hover:bg-orange-600 transition flex justify-center gap-2">
-                        {formStatus==='sending' ? <RefreshCw className="animate-spin"/> : <>ENTRAR NO GRUPO <ArrowRight size={16}/></>}
+                <form onSubmit={handleLeadSubmit} className="space-y-3 bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+                    <input type="text" placeholder="Seu Nome" required value={leadForm.name} onChange={e=>setLeadForm({...leadForm, name: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
+                    <input type="email" placeholder="Seu Melhor E-mail" required value={leadForm.email} onChange={e=>setLeadForm({...leadForm, email: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
+                    <input type="tel" placeholder="Seu WhatsApp (com DDD)" required value={leadForm.phone} onChange={handlePhoneChange} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
+                    
+                    <button type="submit" disabled={formStatus==='sending'} className="w-full bg-primary py-3.5 rounded-lg font-bold text-sm hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-900/20 transition flex justify-center items-center gap-2 mt-2">
+                        {formStatus==='sending' ? <RefreshCw className="animate-spin"/> : <>ENTRAR NO GRUPO VIP <ArrowRight size={16}/></>}
                     </button>
-                    <div className="text-[10px] text-gray-500 flex justify-center gap-1"><ShieldCheck size={10}/> Dados seguros.</div>
+                    <div className="text-[10px] text-gray-500 flex justify-center gap-1 mt-2"><ShieldCheck size={10}/> Seus dados estão 100% seguros conosco.</div>
                 </form>
             )}
          </div>
       </section>
-      <footer className="bg-white border-t py-6 text-center text-xs text-gray-400">&copy; 2026 PohOfertas. Preços sujeitos a alteração.</footer>
-      <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-2 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><Home size={20}/><span className="text-[10px]">Início</span></button>
-        <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400"><Search size={20}/><span className="text-[10px]">Buscar</span></button>
-        <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" className="flex flex-col items-center text-gray-400"><User size={20}/><span className="text-[10px]">VIP</span></a>
+
+      <footer className="bg-white border-t py-8 text-center">
+          <p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p>
+          <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
+      </footer>
+
+      {/* MOBILE NAV */}
+      <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
+        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><HomeIcon size={20}/><span className="text-[10px] font-medium mt-1">Início</span></button>
+        <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400 hover:text-gray-600"><Search size={20}/><span className="text-[10px] font-medium mt-1">Buscar</span></button>
+        <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" className="flex flex-col items-center text-gray-400 hover:text-green-600"><User size={20}/><span className="text-[10px] font-medium mt-1">VIP</span></a>
       </nav>
+      
       <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} product={selectedProduct} />
     </div>
   );
