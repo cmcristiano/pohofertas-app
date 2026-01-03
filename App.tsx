@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
-  Search, Instagram, Facebook, Link as LinkIcon, Home, User, 
+  Search, Instagram, Facebook, Link as LinkIcon, Home as HomeIcon, User, 
   ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight,
-  ShoppingBag, Zap, Sparkles, Filter 
+  ShoppingBag, Zap, Sparkles 
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS (SINCRONIZADA COM O GERADOR) ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS ---
 const LOCAL_CATEGORIES = [
   { id: 'all', label: 'Tudo' },
   { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
@@ -42,7 +42,7 @@ const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // ESTADOS DE FILTRO (Mantive a lógica, removi os ícones quebrados)
+  // ESTADOS DE FILTRO
   const [sortBy, setSortBy] = useState('relevance');
   const [filterStore, setFilterStore] = useState('all');
 
@@ -226,7 +226,7 @@ const App = () => {
         </section>
       )}
 
-      {/* MAIN CONTENT + BARRA DE FERRAMENTAS (SEGURA) */}
+      {/* MAIN CONTENT + BARRA DE FERRAMENTAS */}
       <main className="container mx-auto px-4 py-8" id="promo-list">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
@@ -237,7 +237,7 @@ const App = () => {
                 </h2>
             </div>
 
-            {/* FILTROS E ORDENAÇÃO (SEM ÍCONES EXTERNOS PARA EVITAR CRASH) */}
+            {/* FILTROS E ORDENAÇÃO */}
             <div className="flex gap-2 w-full md:w-auto overflow-x-auto hide-scroll pb-1">
                 <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
                     <span className="text-[10px] text-gray-400 font-bold uppercase">Ordenar:</span>
@@ -297,7 +297,7 @@ const App = () => {
         )}
       </main>
 
-      {/* RODAPÉ E MODAIS (IGUAL V.4.0) */}
+      {/* RODAPÉ E MODAIS */}
       <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
