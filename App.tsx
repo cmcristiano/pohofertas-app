@@ -7,27 +7,138 @@ import {
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS (AGORA 100% PREENCHIDAS COM BANNERS) ---
 const LOCAL_CATEGORIES = [
-  { id: 'all', label: 'Tudo' },
-  { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
-  { id: 'achados', label: 'Achadinhos', banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', title: 'Achadinhos Imperdíveis', sub: 'As melhores ofertas da Shopee e Amazon 🔥' },
-  { id: 'tech', label: 'Tecnologia', banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', title: 'Mundo Tech', sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' },
-  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
-  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
-  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
-  { id: 'livros', label: 'Livros' },
-  { id: 'moda', label: 'Moda' },
-  { id: 'bolsas', label: 'Bolsas' },
-  { id: 'bebes', label: 'Infantil' },
-  { id: 'brinquedos', label: 'Brinquedos' },
-  { id: 'games', label: 'Games' },
-  { id: 'saude', label: 'Saúde' },
-  { id: 'esportes', label: 'Esportes' },
-  { id: 'ferramentas', label: 'Ferramentas' },
-  { id: 'automotivo', label: 'Automotivo' },
-  { id: 'alimentos', label: 'Alimentos' },
-  { id: 'pets', label: 'Pets' },
+  { 
+    id: 'all', 
+    label: 'Tudo' 
+  },
+  { 
+    id: 'volta-aulas', 
+    label: '✏️ Volta às Aulas', 
+    banner: '/banner-escola.jpg', 
+    title: 'Volta às Aulas 2026', 
+    sub: 'Material Escolar com Preço de Atacado 🎒' 
+  },
+  { 
+    id: 'achados', 
+    label: 'Achadinhos', 
+    banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Achadinhos Imperdíveis', 
+    sub: 'As melhores ofertas da Shopee e Amazon 🔥' 
+  },
+  { 
+    id: 'tech', 
+    label: 'Tecnologia', 
+    banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Mundo Tech', 
+    sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' 
+  },
+  { 
+    id: 'cozinha', 
+    label: 'Cozinha', 
+    banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Chef em Casa', 
+    sub: 'Tudo para equipar sua cozinha 🍳' 
+  },
+  { 
+    id: 'casa', 
+    label: 'Casa', 
+    banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Casa & Conforto', 
+    sub: 'Decoração e utilidades para o seu lar 🏠' 
+  },
+  { 
+    id: 'beleza', 
+    label: 'Beleza', 
+    banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Cuidados & Beleza', 
+    sub: 'Skincare, Maquiagem e Perfumes ✨' 
+  },
+  { 
+    id: 'livros', 
+    label: 'Livros', 
+    banner: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Estante Literária', 
+    sub: 'Os melhores títulos com desconto 📚' 
+  },
+  { 
+    id: 'moda', 
+    label: 'Moda', 
+    banner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Estilo & Tendência', 
+    sub: 'Roupas e acessórios para você brilhar 👗' 
+  },
+  { 
+    id: 'bolsas', 
+    label: 'Bolsas', 
+    banner: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Bolsas & Acessórios', 
+    sub: 'Complete seu look com elegância 👜' 
+  },
+  { 
+    id: 'bebes', 
+    label: 'Infantil', 
+    banner: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Mundo dos Pequenos', 
+    sub: 'Fraldas, Roupas e Carinho 👶' 
+  },
+  { 
+    id: 'brinquedos', 
+    label: 'Brinquedos', 
+    banner: 'https://images.unsplash.com/photo-1566576912902-1b6b7dd88d02?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Hora da Diversão', 
+    sub: 'Brinquedos para todas as idades 🧸' 
+  },
+  { 
+    id: 'games', 
+    label: 'Games', 
+    banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Zona Gamer', 
+    sub: 'Consoles, Jogos e Periféricos 🎮' 
+  },
+  { 
+    id: 'saude', 
+    label: 'Saúde', 
+    banner: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Saúde & Bem-Estar', 
+    sub: 'Vitaminas e cuidados pessoais 💊' 
+  },
+  { 
+    id: 'esportes', 
+    label: 'Esportes', 
+    banner: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Vida Fitness', 
+    sub: 'Equipamentos e roupas esportivas ⚽' 
+  },
+  { 
+    id: 'ferramentas', 
+    label: 'Ferramentas', 
+    banner: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Faça Você Mesmo', 
+    sub: 'Ferramentas profissionais e hobby 🛠️' 
+  },
+  { 
+    id: 'automotivo', 
+    label: 'Automotivo', 
+    banner: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Seu Carro Merece', 
+    sub: 'Acessórios e cuidados automotivos 🚗' 
+  },
+  { 
+    id: 'alimentos', 
+    label: 'Alimentos', 
+    banner: 'https://images.unsplash.com/photo-1506484381205-f7945653044d?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Mercado em Casa', 
+    sub: 'Snacks, Bebidas e Despensa 🍫' 
+  },
+  { 
+    id: 'pets', 
+    label: 'Pets', 
+    banner: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&q=80&w=2070', 
+    title: 'Amor de 4 Patas', 
+    sub: 'Ração, Brinquedos e Mimos 🐶' 
+  },
 ];
 
 const SLIDE_COLORS = [
@@ -42,7 +153,7 @@ const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // ESTADOS DE FILTRO
+  // ESTADOS DE FILTRO (Simples e Seguros)
   const [sortBy, setSortBy] = useState('relevance');
   const [filterStore, setFilterStore] = useState('all');
 
@@ -70,21 +181,25 @@ const App = () => {
 
   const heroSlides = useMemo(() => {
     const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
+    
+    // Banner Principal (Agora usa a imagem específica da categoria)
     let mainSlide = {
         id: 'main-hero', 
         color: SLIDE_COLORS[0],
         text: currentCatConfig.title || 'As Melhores Ofertas', 
         sub: currentCatConfig.sub || 'Garimpadas diariamente para você 🧡',
-        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', 
+        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', // Fallback seguro
         link: '#promo-list',
         isFullBanner: true 
     };
+
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const valid = products.filter(p => new Date(p.validity) >= today);
     let categoryProducts = valid;
     if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados' && activeCategory !== 'volta-aulas') {
         categoryProducts = valid.filter(p => p.category === activeCategory);
     }
+    
     const top4 = categoryProducts.sort((a, b) => b.discount - a.discount).slice(0, 4);
     const productSlides = top4.map((p, i) => ({
         id: p.id, color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
