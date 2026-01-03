@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home, User, 
-  ArrowRight, ShoppingBag, RefreshCw, Tag, Mail, 
-  CheckCircle, ShieldCheck, Menu, ChevronLeft, ChevronRight 
+  ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
@@ -35,11 +34,8 @@ const SLIDE_COLORS = [
 const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // ESTADOS DO CARROSSEL INTERATIVO
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isHovered, setIsHovered] = useState(false); // Detecta se o mouse está em cima
-
+  const [isHovered, setIsHovered] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [leadForm, setLeadForm] = useState({ name: '', email: '', phone: '' });
@@ -48,7 +44,6 @@ const App = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. CARREGAR DADOS
   useEffect(() => {
     async function fetchPromocoes() {
       try {
@@ -61,63 +56,41 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // 2. PREPARAR SLIDES
   const heroSlides = useMemo(() => {
-    // SLIDE ESPECIAL (Aqui ele busca a imagem na pasta public)
     const specialSlide = {
-        id: 'school-promo',
-        color: SLIDE_COLORS[0],
-        text: 'Volta às Aulas 2026',
-        sub: 'Material Escolar com Preço de Atacado 🎒',
-        // 👇 AQUI ESTÁ A MÁGICA: Ele busca o arquivo que você salvou na pasta public
-        img: '/banner-escola.jpg', 
-        link: '#' 
+        id: 'school-promo', color: SLIDE_COLORS[0],
+        text: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒',
+        img: '/banner-escola.jpg', link: '#' 
     };
-
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const valid = products.filter(p => new Date(p.validity) >= today);
     const top4 = valid.sort((a, b) => b.discount - a.discount).slice(0, 4);
-    
     const generatedSlides = top4.map((p, i) => ({
         id: p.id, color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
         text: p.title, sub: `🔥 ${p.discount}% OFF | Oferta Relâmpago`, img: p.image, link: p.link
     }));
-
     return [specialSlide, ...generatedSlides];
   }, [products]);
 
-  // LÓGICA DE NAVEGAÇÃO MANUAL
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-  }, [heroSlides.length]);
+  const nextSlide = useCallback(() => { setCurrentSlide((prev) => (prev + 1) % heroSlides.length); }, [heroSlides.length]);
+  const prevSlide = useCallback(() => { setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1)); }, [heroSlides.length]);
 
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
-  }, [heroSlides.length]);
-
-  // TIMER AUTOMÁTICO (Só roda se o mouse NÃO estiver em cima)
   useEffect(() => {
-    if (!heroSlides.length || isHovered) return; // Se estiver com mouse em cima, PAUSA.
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
+    if (!heroSlides.length || isHovered) return;
+    const timer = setInterval(() => { nextSlide(); }, 5000);
     return () => clearInterval(timer);
   }, [heroSlides.length, isHovered, nextSlide]);
 
-  // 3. FILTRO
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       if (new Date(p.validity) < new Date().setHours(0,0,0,0)) return false;
-      if (activeCategory === 'volta-aulas') {
-          return ['papelaria', 'livros', 'informatica', 'tech', 'mochilas'].includes(p.category);
-      }
+      if (activeCategory === 'volta-aulas') return ['papelaria', 'livros', 'informatica', 'tech', 'mochilas'].includes(p.category);
       if (activeCategory !== 'all' && activeCategory !== 'novos' && p.category !== activeCategory && activeCategory !== 'achados') return false;
       if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
   }, [activeCategory, searchQuery, products]);
 
-  // VALIDAÇÃO E ENVIO LEAD
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
@@ -168,15 +141,12 @@ const App = () => {
                  <text x="60" y="36" fontFamily="Segoe UI" fontWeight="800" fontSize="32" fill="#0A192F" letterSpacing="-0.5">PohOfertas</text>
              </svg>
           </div>
-
           <div className="relative w-full">
             <input className="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-full text-sm focus:bg-white focus:ring-1 focus:ring-primary outline-none transition" 
                    placeholder="O que você procura hoje?" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           </div>
         </div>
-
-        {/* MENU CATEGORIAS */}
         <nav className="w-full overflow-x-auto hide-scroll bg-white pb-2 pl-4">
           <div className="flex gap-2 min-w-max pr-4">
             {LOCAL_CATEGORIES.map((cat) => {
@@ -187,44 +157,46 @@ const App = () => {
         </nav>
       </header>
 
-      {/* CARROSSEL INTERATIVO */}
+      {/* CARROSSEL INTERATIVO (FULL BANNER) */}
       {heroSlides.length > 0 && (
-        // Adicionamos onMouseEnter e onMouseLeave aqui para controlar a pausa
         <section className="relative w-full h-[180px] md:h-[300px] overflow-hidden bg-gray-200 group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-          {heroSlides.map((slide, index) => (
+          {heroSlides.map((slide, index) => {
+            const isSpecialSlide = slide.id === 'school-promo';
+            return (
             <div key={slide.id} className={`absolute inset-0 transition-opacity duration-700 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'} ${slide.color}`}>
-              <div className="container mx-auto h-full px-6 flex items-center justify-between">
-                <div className="flex flex-col items-start text-white w-[65%] md:w-[70%] z-10">
+              
+              {/* SE FOR O SLIDE ESPECIAL, A IMAGEM VIRA FUNDO */}
+              {isSpecialSlide && (
+                <>
+                  <img src={slide.img} alt={slide.text} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/167/167707.png'; }}/>
+                  <div className="absolute inset-0 bg-black/30"></div> {/* Overlay para leitura */}
+                </>
+              )}
+
+              <div className="container mx-auto h-full px-6 flex items-center justify-between relative z-20">
+                <div className={`flex flex-col items-start text-white ${isSpecialSlide ? 'w-full md:w-[80%]' : 'w-[65%] md:w-[70%]'} z-10`}>
                    <span className="bg-black/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 backdrop-blur-md">
                      {index === 0 ? '🔔 ATENÇÃO PAIS' : `TOP ${index} DO DIA`}
                    </span>
-                   <h2 className="text-lg md:text-4xl font-black leading-tight line-clamp-2 mb-1">{slide.text}</h2>
-                   <p className="text-xs md:text-lg opacity-90 mb-3 line-clamp-1">{slide.sub}</p>
+                   <h2 className="text-lg md:text-4xl font-black leading-tight line-clamp-2 mb-1 drop-shadow-lg">{slide.text}</h2>
+                   <p className="text-xs md:text-lg opacity-90 mb-3 line-clamp-1 drop-shadow-md">{slide.sub}</p>
                    <a href={slide.link} target="_blank" rel="noreferrer" className="bg-white text-black font-bold py-1.5 px-4 rounded-full text-xs shadow-lg hover:scale-105 transition flex items-center gap-1">
                      VER AGORA <ArrowRight size={12} />
                    </a>
                 </div>
-                <div className="w-[35%] md:w-[30%] flex justify-center h-full py-4">
-                   {/* A imagem agora tenta carregar o banner local primeiro */}
-                   <img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl" onError={(e)=>{
-                     // Se não achar o banner-escola.jpg, usa um placeholder para não ficar em branco
-                     if(slide.img === '/banner-escola.jpg') (e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/167/167707.png';
-                     else (e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png';
-                   }}/>
-                </div>
+                
+                {/* IMAGEM LATERAL (SÓ PARA SLIDES NORMAIS) */}
+                {!isSpecialSlide && (
+                  <div className="w-[35%] md:w-[30%] flex justify-center h-full py-4">
+                    <img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl" onError={(e)=>{(e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png'}}/>
+                  </div>
+                )}
               </div>
             </div>
-          ))}
+          )})}
           
-          {/* BOTÕES DE NAVEGAÇÃO MANUAL (Só aparecem se passar o mouse no PC, ou sempre no mobile) */}
-          <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-1 md:p-2 rounded-full hover:bg-black/50 transition z-20 md:opacity-0 group-hover:opacity-100">
-            <ChevronLeft size={24} />
-          </button>
-          <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-1 md:p-2 rounded-full hover:bg-black/50 transition z-20 md:opacity-0 group-hover:opacity-100">
-            <ChevronRight size={24} />
-          </button>
-
-          {/* BOLINHAS INDICADORAS */}
+          <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-1 md:p-2 rounded-full hover:bg-black/50 transition z-20 md:opacity-0 group-hover:opacity-100"><ChevronLeft size={24} /></button>
+          <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-1 md:p-2 rounded-full hover:bg-black/50 transition z-20 md:opacity-0 group-hover:opacity-100"><ChevronRight size={24} /></button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
              {heroSlides.map((_, i) => (<button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-white w-6' : 'bg-white/40 w-2 hover:bg-white/70'}`} />))}
           </div>
@@ -282,16 +254,12 @@ const App = () => {
             )}
          </div>
       </section>
-
       <footer className="bg-white border-t py-6 text-center text-xs text-gray-400">&copy; 2026 PohOfertas. Preços sujeitos a alteração.</footer>
-
-      {/* MENU MOBILE */}
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-2 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
         <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><Home size={20}/><span className="text-[10px]">Início</span></button>
         <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400"><Search size={20}/><span className="text-[10px]">Buscar</span></button>
         <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" className="flex flex-col items-center text-gray-400"><User size={20}/><span className="text-[10px]">VIP</span></a>
       </nav>
-
       <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} product={selectedProduct} />
     </div>
   );
