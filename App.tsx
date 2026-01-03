@@ -19,13 +19,13 @@ import { CATEGORIES } from './constants';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// CORES SÓLIDAS PARA O BANNER
+// Cores vibrantes para o banner (para não ficar branco no branco)
 const SLIDE_COLORS = [
-  'bg-orange-600', 
-  'bg-blue-600',   
-  'bg-emerald-600',
-  'bg-purple-600', 
-  'bg-red-600',    
+  'bg-gradient-to-r from-orange-600 to-red-600', 
+  'bg-gradient-to-r from-blue-600 to-indigo-700',   
+  'bg-gradient-to-r from-emerald-500 to-green-700',
+  'bg-gradient-to-r from-purple-600 to-pink-600', 
+  'bg-gradient-to-r from-red-600 to-orange-500',    
 ];
 
 const App = () => {
@@ -40,7 +40,7 @@ const App = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. CARREGAR DADOS
+  // 1. CARREGAR DADOS DO JSON
   useEffect(() => {
     async function fetchPromocoes() {
       try {
@@ -58,7 +58,7 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // 2. CARROSSEL TOP 5
+  // 2. LÓGICA DO CARROSSEL (TOP 5 MELHORES DESCONTOS)
   const heroSlides = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -68,6 +68,7 @@ const App = () => {
         return vDate >= today;
     });
 
+    // Ordena por maior desconto
     const top5 = validProducts.sort((a, b) => b.discount - a.discount).slice(0, 5);
 
     if (top5.length > 0) {
@@ -75,7 +76,7 @@ const App = () => {
             id: p.id,
             color: SLIDE_COLORS[index % SLIDE_COLORS.length], 
             text: p.title,
-            sub: `🔥 ${p.discount}% OFF | Melhor Oferta`,
+            sub: `🔥 ${p.discount}% OFF | Melhor Oferta do Dia`,
             img: p.image,
             link: p.link
         }));
@@ -83,30 +84,34 @@ const App = () => {
     return [];
   }, [products]);
 
-  // Timer Slider
+  // Timer do Slider
   useEffect(() => {
     if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 4000); 
+    }, 4500); 
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // 3. FILTRO
+  // 3. FILTRO DA GRADE DE PRODUTOS
   const filteredProducts = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     return products.filter((product) => {
       const validityDate = new Date(product.validity);
+      // Remove produtos vencidos
       if (validityDate < today) return false;
       
+      // Filtro de Categoria
       if (activeCategory !== 'all') {
-         if (activeCategory === 'novos') return true; 
+         if (activeCategory === 'novos') return true; // Categoria "Novos" mostra tudo
          if (product.category !== activeCategory && activeCategory !== 'achados') return false;
       }
 
+      // Filtro de Busca
       if (searchQuery && !product.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      
       return true;
     });
   }, [activeCategory, searchQuery, products]);
@@ -118,29 +123,31 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-background relative font-sans">
+      {/* Estilo CSS Global */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF6600; border-radius: 10px; }
       `}</style>
 
-      {/* TOP STRIPE */}
+      {/* TOP STRIPE (Barra Superior) */}
       <div className="bg-secondary text-white text-xs py-1.5 px-3 flex justify-between items-center z-50 relative">
         <span className="font-semibold hidden sm:inline">Site Oficial PohOfertas</span>
         <span className="font-semibold sm:hidden">PohOfertas Oficial</span>
         <div className="flex items-center gap-3">
-          <a href="https://www.instagram.com/pohachadinhos/" target="_blank" rel="noreferrer" className="hover:text-primary"><Instagram size={14} /></a>
+          <a href="https://www.instagram.com/pohachadinhos/" target="_blank" rel="noreferrer" className="hover:text-primary transition"><Instagram size={14} /></a>
           <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" rel="noreferrer" className="flex items-center gap-1 text-whatsapp font-bold hover:underline">
             <Users size={14} /> <span className="hidden xs:inline">Grupo VIP</span>
           </a>
         </div>
       </div>
 
-      {/* HEADER */}
+      {/* HEADER PRINCIPAL */}
       <header className="sticky top-0 z-40 bg-white shadow-md">
         <div className="container mx-auto px-4 pt-3 pb-2">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
+               {/* LOGO SVG OFICIAL (Restaurado!) */}
                <svg viewBox="0 0 260 50" className="w-[160px] md:w-[210px] h-[35px] md:h-[50px]" fill="none" xmlns="http://www.w3.org/2000/svg">
                  <g transform="translate(0, 5)">
                     <path d="M5 20C5 14.4772 9.47715 10 15 10H30L50 30L30 50H15C9.47715 50 5 45.5228 5 40V20Z" fill="#FF6600" transform="rotate(-15 25 30)"/>
@@ -167,7 +174,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* MENU CATEGORIAS */}
+        {/* MENU DE CATEGORIAS */}
         <nav className="border-t border-gray-100 bg-white py-2 w-full overflow-x-auto custom-scrollbar">
           <div className="flex px-4 gap-3 min-w-max pb-2">
             {CATEGORIES.map((cat) => (
@@ -188,7 +195,7 @@ const App = () => {
         </nav>
       </header>
 
-      {/* CARROSSEL */}
+      {/* CARROSSEL (Só aparece se tiver ofertas) */}
       {heroSlides.length > 0 && (
         <section className="relative w-full h-[200px] md:h-[340px] overflow-hidden bg-gray-100">
           {heroSlides.map((slide, index) => (
@@ -255,19 +262,28 @@ const App = () => {
                   {product.discount}% OFF
                 </div>
 
-                {/* Share */}
+                {/* Botão Share */}
                 <button onClick={() => handleShare(product)} className="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-secondary shadow-md hover:bg-primary hover:text-white transition z-10">
                   <LinkIcon size={16} />
                 </button>
 
-                {/* IMAGEM COM AJUSTE DE PADDING E ASPECTO */}
-                {/* Mudança aqui: aspect-[6/5] e p-2 */}
-                <div className="w-full aspect-[6/5] p-3 bg-white flex items-center justify-center relative">
-                  <img src={product.image} alt={product.title} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" loading="lazy" onError={(e) => {(e.target as HTMLImageElement).src = 'https://placehold.co/200?text=Sem+Img';}} />
+                {/* --- A CORREÇÃO DE IMAGEM ESTÁ AQUI --- */}
+                {/* h-48: Define altura fixa de 192px para a área da imagem.
+                   object-contain: Garante que a imagem caiba inteira sem cortar.
+                   p-4: Dá respiro nas bordas.
+                */}
+                <div className="w-full h-48 bg-white p-4 flex items-center justify-center border-b border-gray-50 relative">
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                    loading="lazy" 
+                    onError={(e) => {(e.target as HTMLImageElement).src = 'https://placehold.co/200?text=Sem+Img';}} 
+                  />
                 </div>
 
-                {/* INFO */}
-                <div className="p-3 flex flex-col flex-grow border-t border-gray-50">
+                {/* INFO DO PRODUTO */}
+                <div className="p-3 flex flex-col flex-grow">
                   <h3 className="text-xs md:text-sm font-medium text-gray-800 line-clamp-2 mb-2 h-9 leading-tight" title={product.title}>{product.title}</h3>
                   <div className="mt-auto">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">
