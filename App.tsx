@@ -2,14 +2,14 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home, User, 
   ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight,
-  ShoppingBag, Zap, Monitor, Coffee, Home as HomeIcon, Sparkles
+  ShoppingBag, Zap, Sparkles, Filter, ArrowUpDown, Store
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS (EXPANDIDA PARA SINCRONIZAR COM GERADOR) ---
 const LOCAL_CATEGORIES = [
-  { id: 'all', label: 'Tudo', icon: <ShoppingBag size={14}/> },
+  { id: 'all', label: 'Tudo' },
   { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
   { id: 'achados', label: 'Achadinhos', banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', title: 'Achadinhos Imperdíveis', sub: 'As melhores ofertas da Shopee e Amazon 🔥' },
   { id: 'tech', label: 'Tecnologia', banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', title: 'Mundo Tech', sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' },
@@ -18,15 +18,20 @@ const LOCAL_CATEGORIES = [
   { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
   { id: 'livros', label: 'Livros' },
   { id: 'moda', label: 'Moda' },
+  { id: 'bolsas', label: 'Bolsas' }, // Adicionado
   { id: 'bebes', label: 'Infantil' },
+  { id: 'brinquedos', label: 'Brinquedos' }, // Adicionado
   { id: 'games', label: 'Games' },
   { id: 'saude', label: 'Saúde' },
   { id: 'esportes', label: 'Esportes' },
+  { id: 'ferramentas', label: 'Ferramentas' }, // Adicionado
+  { id: 'automotivo', label: 'Automotivo' }, // Adicionado
+  { id: 'alimentos', label: 'Alimentos' }, // Adicionado
   { id: 'pets', label: 'Pets' },
 ];
 
 const SLIDE_COLORS = [
-  'bg-gradient-to-r from-orange-600 to-orange-500', // Padrão POH
+  'bg-gradient-to-r from-orange-600 to-orange-500', 
   'bg-gradient-to-r from-blue-600 to-indigo-700',   
   'bg-gradient-to-r from-emerald-500 to-green-700',
   'bg-gradient-to-r from-purple-600 to-pink-600', 
@@ -36,6 +41,11 @@ const SLIDE_COLORS = [
 const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // NOVOS ESTADOS PARA FILTROS
+  const [sortBy, setSortBy] = useState<'relevance' | 'price-asc' | 'price-desc' | 'alpha'>('relevance');
+  const [filterStore, setFilterStore] = useState<'all' | 'Amazon' | 'Shopee'>('all');
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -58,89 +68,84 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // --- LÓGICA INTELIGENTE DOS SLIDES ---
+  // --- LÓGICA DE SLIDES (Mantida V.4.0) ---
   const heroSlides = useMemo(() => {
-    // 1. Encontra a configuração da categoria atual
     const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
-    
-    // 2. Define o Slide Principal (Hero) baseado na categoria
     let mainSlide = {
         id: 'main-hero', 
         color: SLIDE_COLORS[0],
         text: currentCatConfig.title || 'As Melhores Ofertas', 
         sub: currentCatConfig.sub || 'Garimpadas diariamente para você 🧡',
-        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', // Banner padrão se não tiver
+        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', 
         link: '#promo-list',
-        isFullBanner: true // Nova flag para ativar o modo "Outdoor"
+        isFullBanner: true 
     };
-
-    // 3. Pega produtos destaque para os próximos slides
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const valid = products.filter(p => new Date(p.validity) >= today);
-    
-    // Filtra produtos da categoria atual (se não for "Tudo" ou "Volta as Aulas" que mostra mix)
     let categoryProducts = valid;
     if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados' && activeCategory !== 'volta-aulas') {
         categoryProducts = valid.filter(p => p.category === activeCategory);
     }
-    
-    // Pega os Top 4 descontos
     const top4 = categoryProducts.sort((a, b) => b.discount - a.discount).slice(0, 4);
-    
     const productSlides = top4.map((p, i) => ({
-        id: p.id, 
-        color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
-        text: p.title, 
-        sub: `🔥 ${p.discount}% OFF | Oferta Relâmpago`, 
-        img: p.image, 
-        link: p.link,
-        isFullBanner: false // Produtos continuam com layout lateral
+        id: p.id, color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
+        text: p.title, sub: `🔥 ${p.discount}% OFF | Oferta Relâmpago`, img: p.image, link: p.link, isFullBanner: false 
     }));
-
-    // Se não tiver produtos na categoria, mostra só o banner principal
     return [mainSlide, ...productSlides];
   }, [products, activeCategory]);
 
-  // Reseta o slide para 0 quando muda de categoria
   useEffect(() => { setCurrentSlide(0); }, [activeCategory]);
-
   const nextSlide = useCallback(() => { setCurrentSlide((prev) => (prev + 1) % heroSlides.length); }, [heroSlides.length]);
   const prevSlide = useCallback(() => { setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1)); }, [heroSlides.length]);
+  useEffect(() => { if (!heroSlides.length || isHovered) return; const timer = setInterval(() => { nextSlide(); }, 5000); return () => clearInterval(timer); }, [heroSlides.length, isHovered, nextSlide]);
 
-  useEffect(() => {
-    if (!heroSlides.length || isHovered) return;
-    const timer = setInterval(() => { nextSlide(); }, 5000);
-    return () => clearInterval(timer);
-  }, [heroSlides.length, isHovered, nextSlide]);
-
+  // --- FILTRAGEM E ORDENAÇÃO (ATUALIZADO V.4.1) ---
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    let result = products.filter((p) => {
+      // 1. Validade
       if (new Date(p.validity) < new Date().setHours(0,0,0,0)) return false;
-      if (activeCategory === 'volta-aulas') return ['papelaria', 'livros', 'informatica', 'tech', 'mochilas'].includes(p.category);
-      if (activeCategory !== 'all' && activeCategory !== 'novos' && p.category !== activeCategory && activeCategory !== 'achados') return false;
+      
+      // 2. Categoria
+      if (activeCategory === 'volta-aulas') {
+          if (!['papelaria', 'livros', 'informatica', 'tech', 'mochilas'].includes(p.category)) return false;
+      } else if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados') {
+          if (p.category !== activeCategory) return false;
+      }
+      
+      // 3. Busca Texto
       if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      
+      // 4. Filtro de Loja
+      if (filterStore !== 'all') {
+          if (!p.store.toLowerCase().includes(filterStore.toLowerCase())) return false;
+      }
+
       return true;
     });
-  }, [activeCategory, searchQuery, products]);
 
-  // ... (Funções de Form e Share mantidas iguais) ...
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 11) value = value.slice(0, 11);
-    if (value.length > 2) {
-        value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-        if (value.length > 10) value = `${value.slice(0, 10)}-${value.slice(10)}`;
+    // 5. Ordenação
+    if (sortBy === 'price-asc') {
+        result.sort((a, b) => a.newPrice - b.newPrice);
+    } else if (sortBy === 'price-desc') {
+        result.sort((a, b) => b.newPrice - a.newPrice);
+    } else if (sortBy === 'alpha') {
+        result.sort((a, b) => a.title.localeCompare(b.title));
     }
-    setLeadForm({ ...leadForm, phone: value });
-    if (formErrors.phone) setFormErrors({ ...formErrors, phone: '' });
-  };
+    // 'relevance' mantém a ordem original do JSON (novos primeiro geralmente)
 
+    return result;
+  }, [activeCategory, searchQuery, products, filterStore, sortBy]);
+
+  // ... (Forms e Share mantidos) ...
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); if (value.length > 11) value = value.slice(0, 11);
+    if (value.length > 2) { value = `(${value.slice(0, 2)}) ${value.slice(2)}`; if (value.length > 10) value = `${value.slice(0, 10)}-${value.slice(10)}`; }
+    setLeadForm({ ...leadForm, phone: value }); if (formErrors.phone) setFormErrors({ ...formErrors, phone: '' });
+  };
   const handleLeadSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    let errors = { email: '', phone: '' }; let isValid = true;
+    e.preventDefault(); let errors = { email: '', phone: '' }; let isValid = true;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadForm.email)) { errors.email = 'E-mail inválido.'; isValid = false; }
-    const rawPhone = leadForm.phone.replace(/\D/g, ''); 
-    if (rawPhone.length < 11 || rawPhone[2] !== '9') { errors.phone = 'Celular inválido (DDD + 9...).'; isValid = false; }
+    const rawPhone = leadForm.phone.replace(/\D/g, ''); if (rawPhone.length < 11 || rawPhone[2] !== '9') { errors.phone = 'Celular inválido.'; isValid = false; }
     if (!isValid) { setFormErrors(errors); return; }
     setFormStatus('sending');
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwY3v9amCacI9BCr2uozFWmz86QMQjwqvDT7jXbJ6KLemmSymxByy09HidpcxFzjh-Olw/exec'; 
@@ -148,7 +153,6 @@ const App = () => {
     .then(() => { setFormStatus('success'); setFormErrors({ email: '', phone: '' }); setTimeout(() => { setFormStatus('idle'); setLeadForm({ name: '', email: '', phone: '' }); }, 4000); })
     .catch(() => { alert("Erro ao salvar."); setFormStatus('idle'); });
   };
-
   const handleShare = (p: Product) => { setSelectedProduct(p); setIsShareModalOpen(true); };
 
   return (
@@ -190,44 +194,32 @@ const App = () => {
         </nav>
       </header>
 
-      {/* CARROSSEL INTELIGENTE (ADAPTA O FUNDO POR CATEGORIA) */}
+      {/* CARROSSEL */}
       {heroSlides.length > 0 && (
         <section className="relative w-full h-[180px] md:h-[300px] overflow-hidden bg-gray-200 group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           {heroSlides.map((slide, index) => {
-            // Verifica se é um Banner Full (Outdoor) ou Slide de Produto Normal
             const isFullBanner = slide.isFullBanner;
-            
             return (
             <div key={slide.id} className={`absolute inset-0 transition-opacity duration-700 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'} ${slide.color}`}>
-              
-              {/* MODO OUTDOOR (Fundo Total) */}
               {isFullBanner && (
                 <>
                   <img src={slide.img} alt={slide.text} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070'; }}/>
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div> {/* Degradê elegante para leitura */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
                 </>
               )}
-
               <div className="container mx-auto h-full px-6 flex items-center justify-between relative z-20">
                 <div className={`flex flex-col items-start text-white ${isFullBanner ? 'w-full md:w-[60%]' : 'w-[65%] md:w-[70%]'} z-10`}>
-                   
-                   {/* BADGE (Etiqueta acima do título) */}
                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 backdrop-blur-md ${isFullBanner ? 'bg-primary text-white' : 'bg-black/20'}`}>
                      {index === 0 ? `✨ ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label || 'DESTAQUE'}` : `TOP ${index} DO DIA`}
                    </span>
-
                    <h2 className="text-xl md:text-5xl font-black leading-tight line-clamp-2 mb-2 drop-shadow-lg">{slide.text}</h2>
                    <p className="text-xs md:text-xl opacity-90 mb-4 line-clamp-2 drop-shadow-md font-medium">{slide.sub}</p>
-                   
                    <a href={slide.link} target="_blank" rel="noreferrer" className="bg-white text-black font-bold py-2 px-6 rounded-full text-xs md:text-sm shadow-lg hover:scale-105 transition flex items-center gap-2">
                      VER AGORA <ArrowRight size={14} />
                    </a>
                 </div>
-                
-                {/* MODO PRODUTO (Imagem Lateral flutuando) */}
                 {!isFullBanner && (
                   <div className="w-[35%] md:w-[30%] flex justify-center h-full py-4 relative">
-                     {/* Efeito de brilho atrás do produto */}
                     <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full transform scale-75"></div>
                     <img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl relative z-10 transform hover:scale-110 transition duration-500" onError={(e)=>{(e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png'}}/>
                   </div>
@@ -235,8 +227,6 @@ const App = () => {
               </div>
             </div>
           )})}
-          
-          {/* Navegação */}
           <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition z-20 opacity-0 group-hover:opacity-100"><ChevronLeft size={24} /></button>
           <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition z-20 opacity-0 group-hover:opacity-100"><ChevronRight size={24} /></button>
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
@@ -245,45 +235,71 @@ const App = () => {
         </section>
       )}
 
-      {/* GRID DE PRODUTOS */}
+      {/* MAIN CONTENT + BARRA DE FERRAMENTAS */}
       <main className="container mx-auto px-4 py-8" id="promo-list">
-        <div className="flex items-center gap-2 mb-6">
-            <Zap className="text-primary animate-pulse" size={20}/>
-            <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">
-              {activeCategory === 'all' ? '🔥 Ofertas Quentes' : `Melhores de ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label}`}
-            </h2>
+        
+        {/* BARRA DE FERRAMENTAS (NOVO) */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+                <Zap className="text-primary animate-pulse" size={20}/>
+                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">
+                {activeCategory === 'all' ? '🔥 Ofertas Quentes' : `Melhores de ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label}`}
+                </h2>
+            </div>
+
+            {/* FILTROS E ORDENAÇÃO */}
+            <div className="flex gap-2 w-full md:w-auto overflow-x-auto hide-scroll pb-1">
+                <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
+                    <ArrowUpDown size={14} className="text-gray-400"/>
+                    <select 
+                        className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                    >
+                        <option value="relevance">Mais Relevantes</option>
+                        <option value="price-asc">Menor Preço</option>
+                        <option value="price-desc">Maior Preço</option>
+                        <option value="alpha">A-Z</option>
+                    </select>
+                </div>
+
+                <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
+                    <Store size={14} className="text-gray-400"/>
+                    <select 
+                        className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer"
+                        value={filterStore}
+                        onChange={(e) => setFilterStore(e.target.value as any)}
+                    >
+                        <option value="all">Todas as Lojas</option>
+                        <option value="Amazon">Amazon</option>
+                        <option value="Shopee">Shopee</option>
+                    </select>
+                </div>
+            </div>
         </div>
         
         {loading ? <div className="text-center py-20"><RefreshCw className="animate-spin mx-auto text-primary mb-2"/><p className="text-gray-400 text-sm">Carregando ofertas...</p></div> : 
-         filteredProducts.length === 0 ? <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300"><ShoppingBag className="mx-auto text-gray-300 mb-2" size={40}/><p className="text-gray-400">Nenhuma oferta encontrada nesta categoria hoje.</p></div> : (
+         filteredProducts.length === 0 ? <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300"><ShoppingBag className="mx-auto text-gray-300 mb-2" size={40}/><p className="text-gray-400">Nenhuma oferta encontrada.</p></div> : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {filteredProducts.map((p) => (
               <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition duration-300">
                 {p.discount > 0 && <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-br z-10 shadow-sm">{p.discount}% OFF</div>}
-                
                 <button onClick={() => handleShare(p)} className="absolute top-2 right-2 bg-gray-100 p-2 rounded-full text-gray-500 hover:text-primary hover:bg-orange-50 transition z-10"><LinkIcon size={14}/></button>
-                
                 <div className="w-full h-48 bg-white p-6 flex items-center justify-center border-b border-gray-50 group-hover:bg-gray-50 transition">
                   <img src={p.image} className="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-500" loading="lazy" onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/150'}}/>
                 </div>
-                
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 px-1.5 py-0.5 rounded">{p.store}</span>
                      {p.category === 'volta-aulas' && <span className="text-[10px] text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded font-bold">ESCOLA</span>}
                   </div>
-                  
                   <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 h-10 mb-2 leading-tight group-hover:text-primary transition">{p.title}</h3>
-                  
                   <div className="flex flex-col mb-3">
                     {p.oldPrice > 0 && <span className="text-xs text-gray-400 line-through">R$ {p.oldPrice.toFixed(2)}</span>}
                     <span className="text-xl font-black text-gray-900">R$ {p.newPrice.toFixed(2)}</span>
                     {p.oldPrice > 0 && <span className="text-[10px] text-green-600 font-medium">Economia de R$ {(p.oldPrice - p.newPrice).toFixed(2)}</span>}
                   </div>
-                  
-                  <a href={p.link} target="_blank" className="block text-center bg-gray-900 text-white font-bold text-xs py-2.5 rounded-lg hover:bg-primary transition shadow-sm hover:shadow-lg transform active:scale-95">
-                      PEGAR PROMOÇÃO
-                  </a>
+                  <a href={p.link} target="_blank" className="block text-center bg-gray-900 text-white font-bold text-xs py-2.5 rounded-lg hover:bg-primary transition shadow-sm hover:shadow-lg transform active:scale-95">PEGAR PROMOÇÃO</a>
                 </div>
               </div>
             ))}
@@ -293,17 +309,14 @@ const App = () => {
 
       {/* CLUBE VIP (RODAPÉ) */}
       <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden">
-         {/* Detalhes de fundo */}
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-         
          <div className="max-w-xl mx-auto text-center relative z-10">
             <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border border-white/20">
                 <Sparkles size={12} className="text-yellow-400"/> CLUBE POH VIP
             </div>
             <h2 className="text-3xl font-black mb-3">Ofertas no seu Zap 📲</h2>
             <p className="text-gray-300 mb-8 leading-relaxed">Não perca tempo procurando. Nossa equipe garimpa os melhores preços e manda direto no seu celular. Sem spam, só desconto real.</p>
-            
             {formStatus === 'success' ? (
                 <div className="bg-green-500/20 p-6 rounded-xl border border-green-500/50 text-green-200 flex flex-col items-center animate-in fade-in zoom-in duration-300">
                     <CheckCircle size={32} className="mb-2 text-green-400"/>
@@ -315,7 +328,6 @@ const App = () => {
                     <input type="text" placeholder="Seu Nome" required value={leadForm.name} onChange={e=>setLeadForm({...leadForm, name: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
                     <input type="email" placeholder="Seu Melhor E-mail" required value={leadForm.email} onChange={e=>setLeadForm({...leadForm, email: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
                     <input type="tel" placeholder="Seu WhatsApp (com DDD)" required value={leadForm.phone} onChange={handlePhoneChange} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
-                    
                     <button type="submit" disabled={formStatus==='sending'} className="w-full bg-primary py-3.5 rounded-lg font-bold text-sm hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-900/20 transition flex justify-center items-center gap-2 mt-2">
                         {formStatus==='sending' ? <RefreshCw className="animate-spin"/> : <>ENTRAR NO GRUPO VIP <ArrowRight size={16}/></>}
                     </button>
@@ -329,14 +341,11 @@ const App = () => {
           <p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p>
           <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
       </footer>
-
-      {/* MOBILE NAV */}
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
         <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><HomeIcon size={20}/><span className="text-[10px] font-medium mt-1">Início</span></button>
         <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400 hover:text-gray-600"><Search size={20}/><span className="text-[10px] font-medium mt-1">Buscar</span></button>
         <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" className="flex flex-col items-center text-gray-400 hover:text-green-600"><User size={20}/><span className="text-[10px] font-medium mt-1">VIP</span></a>
       </nav>
-      
       <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} product={selectedProduct} />
     </div>
   );
