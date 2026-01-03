@@ -178,5 +178,89 @@
     "validity": "2026-01-10",
     "discount": 46,
     "link": "https://amzn.to/3YmreEF"
+  },
+  {
+    "id": "1767455651602",
+    "title": "Caderno Universitário 1 Matéria 80 Folhas Credeal",
+    "oldPrice": 31.99,
+    "newPrice": 10.99,
+    "image": "https://down-br.img.susercontent.com/file/sg-11134201-7rdwd-lzgza13ltxvbfc@resize_w900_nl.webp",
+    "store": "Shopee",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 66,
+    "link": "https://s.shopee.com.br/30hSG9OLku"
+  },
+  {
+    "id": "1767455695490",
+    "title": "Canetas Esferográficas CIS Spiro Multicoloridas - 8 unidades",
+    "oldPrice": 27.3,
+    "newPrice": 23.2,
+    "image": "https://m.media-amazon.com/images/I/51P8qxOGA0L._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 15,
+    "link": "https://amzn.to/4pkG61i"
+  },
+  {
+    "id": "1767455743791",
+    "title": "Pentel Giz Pastel Oleoso 50 Cores PHN-50",
+    "oldPrice": 74.28,
+    "newPrice": 34.96,
+    "image": "https://m.media-amazon.com/images/I/71atpfdmmyL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 53,
+    "link": "https://amzn.to/3LictQc"
+  },
+  {
+    "id": "1767455815074",
+    "title": "Caneta Pincel dual Tip Aquarelável com 10 cores Cis",
+    "oldPrice": 27.12,
+    "newPrice": 23.36,
+    "image": "https://m.media-amazon.com/images/I/81RRznPUQVS._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 14,
+    "link": "https://amzn.to/4juai98"
+  },
+  {
+    "id": "1767455919814",
+    "title": "Kit Lapiseira Cis Tecnocis 0.7mm Verde Grafite Borracha",
+    "oldPrice": 29.99,
+    "newPrice": 26.91,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_2X_814005-MLA99643474574_122025-F.webp",
+    "store": "Mercado Livre",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 10,
+    "link": "https://mercadolivre.com/sec/2iEb7z6"
+  },
+  {
+    "id": "1767456059712",
+    "title": "Mochila Feminina Coreana Escolar-Passeio-Trabalho Grande Impermeável",
+    "oldPrice": 119.99,
+    "newPrice": 37.8,
+    "image": "https://down-br.img.susercontent.com/file/br-11134207-7r98o-m3nybkiv47ob2e@resize_w900_nl.webp",
+    "store": "Shopee",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 68,
+    "link": "https://s.shopee.com.br/8pfFDJmMcx"
+  },
+  {
+    "id": "1767456182483",
+    "title": "Mochila infantil escolar menina com dois compartimentos ideal para passeio , creche, caminhada",
+    "oldPrice": 0,
+    "newPrice": 29.9,
+    "image": "https://down-br.img.susercontent.com/file/br-11134211-81z1k-mgdnzrwua4n43e@resize_w900_nl.webp",
+    "store": "Shopee",
+    "category": "papelaria",
+    "validity": "2026-02-02",
+    "discount": 0,
+    "link": "https://s.shopee.com.br/7fTHpNGkwc"
   }
 ]
