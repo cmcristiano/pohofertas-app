@@ -15,12 +15,15 @@ import {
   Tag,
   Mail,
   CheckCircle,
-  ShieldCheck
+  ShieldCheck,
+  AlertCircle,
+  Phone
 } from 'lucide-react';
 import { CATEGORIES } from './constants'; 
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
+// Cores do Banner Rotativo
 const SLIDE_COLORS = [
   'bg-gradient-to-r from-orange-600 to-red-600', 
   'bg-gradient-to-r from-blue-600 to-indigo-700',   
@@ -30,22 +33,23 @@ const SLIDE_COLORS = [
 ];
 
 const App = () => {
-  // Estados
+  // --- ESTADOS GERAIS ---
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
-  // Estado do Formulário de Lead
+  // --- ESTADOS DO FORMULÁRIO DE LEADS (NOVO) ---
   const [leadForm, setLeadForm] = useState({ name: '', email: '', phone: '' });
   const [formStatus, setFormStatus] = useState<'idle' | 'success'>('idle');
+  const [formErrors, setFormErrors] = useState({ email: '', phone: '' });
 
-  // Dados
+  // --- DADOS ---
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. CARREGAR DADOS
+  // 1. CARREGAMENTO DOS DADOS (JSON)
   useEffect(() => {
     async function fetchPromocoes() {
       try {
@@ -62,7 +66,7 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // 2. CARROSSEL
+  // 2. LÓGICA DO CARROSSEL (TOP 5)
   const heroSlides = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -87,7 +91,7 @@ const App = () => {
     return [];
   }, [products]);
 
-  // Timer Slider
+  // Timer do Slider
   useEffect(() => {
     if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
@@ -96,7 +100,7 @@ const App = () => {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // 3. FILTRO
+  // 3. FILTRO DA GRADE DE PRODUTOS
   const filteredProducts = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -104,30 +108,87 @@ const App = () => {
     return products.filter((product) => {
       const validityDate = new Date(product.validity);
       if (validityDate < today) return false;
+      
       if (activeCategory !== 'all') {
          if (activeCategory === 'novos') return true; 
          if (product.category !== activeCategory && activeCategory !== 'achados') return false;
       }
+
       if (searchQuery && !product.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      
       return true;
     });
   }, [activeCategory, searchQuery, products]);
 
-  const handleShare = (product: Product) => {
-    setSelectedProduct(product);
-    setIsShareModalOpen(true);
+  // --- LÓGICA DE VALIDAÇÃO INTELIGENTE ---
+
+  // Máscara de Telefone: (DD) 9XXXX-XXXX
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); // Remove letras
+    if (value.length > 11) value = value.slice(0, 11); // Trava em 11 digitos
+    
+    // Aplica formatação visual
+    if (value.length > 2) {
+        value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+        if (value.length > 10) {
+            value = `${value.slice(0, 10)}-${value.slice(10)}`;
+        }
+    }
+    setLeadForm({ ...leadForm, phone: value });
+    // Limpa erro ao digitar
+    if (formErrors.phone) setFormErrors({ ...formErrors, phone: '' });
   };
 
-  // Lógica do Formulário (Simulação)
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // AQUI FUTURAMENTE ENTRA A INTEGRAÇÃO COM BANCO DE DADOS
-    console.log("Dados capturados:", leadForm);
+    let errors = { email: '', phone: '' };
+    let isValid = true;
+
+    // 1. Validação de Email (Regex simples: texto@texto.texto)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(leadForm.email)) {
+        errors.email = 'E-mail inválido. Verifique o @ e o ponto.';
+        isValid = false;
+    }
+
+    // 2. Validação de Telefone (Rígida)
+    const rawPhone = leadForm.phone.replace(/\D/g, ''); // Pega só os números
+    
+    if (rawPhone.length < 11) {
+        errors.phone = 'Digite o número completo (DDD + 9 dígitos).';
+        isValid = false;
+    } else {
+        const ddd = parseInt(rawPhone.substring(0, 2));
+        const firstDigit = rawPhone[2]; // Terceiro caractere (logo após o DDD)
+
+        if (ddd < 11 || ddd > 99) {
+            errors.phone = 'DDD inválido.';
+            isValid = false;
+        } else if (firstDigit !== '9') {
+            errors.phone = 'O número de celular deve começar com 9.';
+            isValid = false;
+        }
+    }
+
+    if (!isValid) {
+        setFormErrors(errors);
+        return;
+    }
+
+    // Se passou na validação:
+    console.log("Lead Capturado com Sucesso:", leadForm);
     setFormStatus('success');
+    setFormErrors({ email: '', phone: '' });
+    
     setTimeout(() => {
         setFormStatus('idle');
         setLeadForm({ name: '', email: '', phone: '' });
-    }, 3000);
+    }, 4000);
+  };
+
+  const handleShare = (product: Product) => {
+    setSelectedProduct(product);
+    setIsShareModalOpen(true);
   };
 
   return (
@@ -138,23 +199,22 @@ const App = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF6600; border-radius: 10px; }
       `}</style>
 
-      {/* TOP STRIPE (LIMPO - SEM WHATSAPP) */}
+      {/* TOP STRIPE */}
       <div className="bg-secondary text-white text-xs py-1.5 px-3 flex justify-between items-center z-50 relative">
         <span className="font-semibold hidden sm:inline">Site Oficial PohOfertas</span>
         <span className="font-semibold sm:hidden">PohOfertas Oficial</span>
         <div className="flex items-center gap-3">
           <a href="https://www.instagram.com/pohachadinhos/" target="_blank" rel="noreferrer" className="hover:text-primary transition"><Instagram size={14} /></a>
           <a href="https://www.facebook.com/PohAchadinhos" target="_blank" rel="noreferrer" className="hover:text-primary transition"><Facebook size={14} /></a>
-          {/* Removi o WhatsApp daqui conforme pedido */}
         </div>
       </div>
 
-      {/* HEADER (LIMPO - SEM BOTÃO PEDIR) */}
+      {/* HEADER */}
       <header className="sticky top-0 z-40 bg-white shadow-md">
         <div className="container mx-auto px-4 pt-3 pb-2">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
-               {/* LOGO */}
+               {/* LOGO SVG OFICIAL */}
                <svg viewBox="0 0 260 50" className="w-[160px] md:w-[210px] h-[35px] md:h-[50px]" fill="none" xmlns="http://www.w3.org/2000/svg">
                  <g transform="translate(0, 5)">
                     <path d="M5 20C5 14.4772 9.47715 10 15 10H30L50 30L30 50H15C9.47715 50 5 45.5228 5 40V20Z" fill="#FF6600" transform="rotate(-15 25 30)"/>
@@ -164,8 +224,6 @@ const App = () => {
                  <text x="60" y="36" fontFamily="Segoe UI, sans-serif" fontWeight="800" fontSize="32" fill="#0A192F" letterSpacing="-0.5">PohOfertas</text>
                </svg>
             </div>
-            
-            {/* REMOVIDO BOTÃO 'PEDIR OFERTA' AQUI */}
           </div>
 
           <div className="relative w-full mt-2">
@@ -180,7 +238,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* MENU */}
+        {/* MENU CATEGORIAS */}
         <nav className="border-t border-gray-100 bg-white py-2 w-full overflow-x-auto custom-scrollbar">
           <div className="flex px-4 gap-3 min-w-max pb-2">
             {CATEGORIES.map((cat) => (
@@ -242,7 +300,7 @@ const App = () => {
         </section>
       )}
 
-      {/* GRADE PRODUTOS */}
+      {/* GRID DE PRODUTOS */}
       <main className="container mx-auto px-4 py-8">
         <h2 className="text-xl font-bold text-secondary mb-6 flex items-center gap-2 border-b pb-2">
           <Tag className="text-primary" size={20} /> Ofertas do Momento
@@ -262,12 +320,16 @@ const App = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {filteredProducts.map((product) => (
               <div key={product.id} className="group bg-white rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden relative">
+                
                 <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded-br-lg z-10 shadow-sm">
                   {product.discount}% OFF
                 </div>
+
                 <button onClick={() => handleShare(product)} className="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-secondary shadow-md hover:bg-primary hover:text-white transition z-10">
                   <LinkIcon size={16} />
                 </button>
+
+                {/* IMAGEM PADRONIZADA */}
                 <div className="w-full h-48 bg-white p-4 flex items-center justify-center border-b border-gray-50 relative">
                   <img 
                     src={product.image} 
@@ -277,6 +339,7 @@ const App = () => {
                     onError={(e) => {(e.target as HTMLImageElement).src = 'https://placehold.co/200?text=Sem+Img';}} 
                   />
                 </div>
+
                 <div className="p-3 flex flex-col flex-grow">
                   <h3 className="text-xs md:text-sm font-medium text-gray-800 line-clamp-2 mb-2 h-9 leading-tight" title={product.title}>{product.title}</h3>
                   <div className="mt-auto">
@@ -299,9 +362,9 @@ const App = () => {
         )}
       </main>
 
-      {/* --- SEÇÃO DE CAPTURA (CLUBE VIP) --- */}
+      {/* --- SEÇÃO DE CAPTURA INTELIGENTE (CLUBE POH VIP) --- */}
       <section className="bg-gradient-to-br from-secondary to-[#0f172a] text-white py-12 mt-8 relative overflow-hidden">
-         {/* Elemento Decorativo de Fundo */}
+         {/* Efeito de Fundo */}
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary rounded-full blur-[100px] opacity-20 -mr-20 -mt-20"></div>
          
          <div className="container mx-auto px-4 relative z-10">
@@ -319,34 +382,63 @@ const App = () => {
                         <p>Fique de olho, em breve mandaremos novidades.</p>
                     </div>
                 ) : (
-                    <form onSubmit={handleLeadSubmit} className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm shadow-xl">
+                    <form onSubmit={handleLeadSubmit} className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm shadow-xl text-left">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <input 
-                                type="text" 
-                                placeholder="Seu Nome" 
-                                required
-                                value={leadForm.name}
-                                onChange={(e) => setLeadForm({...leadForm, name: e.target.value})}
-                                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:bg-white/20 transition"
-                            />
-                            <input 
-                                type="email" 
-                                placeholder="Seu Melhor E-mail" 
-                                required
-                                value={leadForm.email}
-                                onChange={(e) => setLeadForm({...leadForm, email: e.target.value})}
-                                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:bg-white/20 transition"
-                            />
-                            <input 
-                                type="tel" 
-                                placeholder="WhatsApp (com DDD)" 
-                                required
-                                value={leadForm.phone}
-                                onChange={(e) => setLeadForm({...leadForm, phone: e.target.value})}
-                                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:bg-white/20 transition"
-                            />
+                            {/* Nome */}
+                            <div>
+                                <label className="text-[10px] text-gray-400 uppercase font-bold mb-1 block pl-1">Nome</label>
+                                <div className="relative">
+                                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Seu Nome" 
+                                        required
+                                        value={leadForm.name}
+                                        onChange={(e) => setLeadForm({...leadForm, name: e.target.value})}
+                                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:bg-white/20 transition"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Email */}
+                            <div>
+                                <label className="text-[10px] text-gray-400 uppercase font-bold mb-1 block pl-1">E-mail</label>
+                                <div className="relative">
+                                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input 
+                                        type="email" 
+                                        placeholder="seu@email.com" 
+                                        required
+                                        value={leadForm.email}
+                                        onChange={(e) => { 
+                                            setLeadForm({...leadForm, email: e.target.value}); 
+                                            setFormErrors({...formErrors, email: ''}) 
+                                        }}
+                                        className={`w-full pl-10 pr-4 py-3 bg-white/10 border ${formErrors.email ? 'border-red-500 bg-red-500/10' : 'border-white/20'} rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition`}
+                                    />
+                                </div>
+                                {formErrors.email && <span className="text-red-400 text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {formErrors.email}</span>}
+                            </div>
+                            
+                            {/* Telefone */}
+                            <div>
+                                <label className="text-[10px] text-gray-400 uppercase font-bold mb-1 block pl-1">WhatsApp</label>
+                                <div className="relative">
+                                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input 
+                                        type="tel" 
+                                        placeholder="(11) 9XXXX-XXXX" 
+                                        required
+                                        value={leadForm.phone}
+                                        onChange={handlePhoneChange}
+                                        className={`w-full pl-10 pr-4 py-3 bg-white/10 border ${formErrors.phone ? 'border-red-500 bg-red-500/10' : 'border-white/20'} rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition`}
+                                    />
+                                </div>
+                                {formErrors.phone && <span className="text-red-400 text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {formErrors.phone}</span>}
+                            </div>
                         </div>
-                        <button type="submit" className="w-full mt-4 bg-primary hover:bg-orange-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2">
+                        
+                        <button type="submit" className="w-full mt-6 bg-primary hover:bg-orange-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2">
                             QUERO ENTRAR NO CLUBE <ArrowRight size={18} />
                         </button>
                         
@@ -360,6 +452,7 @@ const App = () => {
          </div>
       </section>
 
+      {/* RODAPÉ */}
       <footer className="bg-white border-t border-gray-200 pt-8 pb-24 md:pb-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-400 text-xs max-w-2xl mx-auto mb-4"><strong>Aviso:</strong> O PohOfertas é um agregador de promoções. Preços e disponibilidade sujeitos a alteração pelas lojas.</p>
