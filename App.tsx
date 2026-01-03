@@ -40,9 +40,9 @@ const App = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
-  // --- ESTADOS DO FORMULÁRIO DE LEADS (NOVO) ---
+  // --- ESTADOS DO FORMULÁRIO DE LEADS ---
   const [leadForm, setLeadForm] = useState({ name: '', email: '', phone: '' });
-  const [formStatus, setFormStatus] = useState<'idle' | 'success'>('idle');
+  const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success'>('idle');
   const [formErrors, setFormErrors] = useState({ email: '', phone: '' });
 
   // --- DADOS ---
@@ -120,7 +120,7 @@ const App = () => {
     });
   }, [activeCategory, searchQuery, products]);
 
-  // --- LÓGICA DE VALIDAÇÃO INTELIGENTE ---
+  // --- LÓGICA DE VALIDAÇÃO E ENVIO ---
 
   // Máscara de Telefone: (DD) 9XXXX-XXXX
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +135,6 @@ const App = () => {
         }
     }
     setLeadForm({ ...leadForm, phone: value });
-    // Limpa erro ao digitar
     if (formErrors.phone) setFormErrors({ ...formErrors, phone: '' });
   };
 
@@ -144,7 +143,7 @@ const App = () => {
     let errors = { email: '', phone: '' };
     let isValid = true;
 
-    // 1. Validação de Email (Regex simples: texto@texto.texto)
+    // 1. Validação de Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(leadForm.email)) {
         errors.email = 'E-mail inválido. Verifique o @ e o ponto.';
@@ -152,14 +151,14 @@ const App = () => {
     }
 
     // 2. Validação de Telefone (Rígida)
-    const rawPhone = leadForm.phone.replace(/\D/g, ''); // Pega só os números
+    const rawPhone = leadForm.phone.replace(/\D/g, ''); 
     
     if (rawPhone.length < 11) {
         errors.phone = 'Digite o número completo (DDD + 9 dígitos).';
         isValid = false;
     } else {
         const ddd = parseInt(rawPhone.substring(0, 2));
-        const firstDigit = rawPhone[2]; // Terceiro caractere (logo após o DDD)
+        const firstDigit = rawPhone[2]; 
 
         if (ddd < 11 || ddd > 99) {
             errors.phone = 'DDD inválido.';
@@ -170,20 +169,35 @@ const App = () => {
         }
     }
 
-    if (!isValid) {
-        setFormErrors(errors);
-        return;
-    }
+    if (!isValid) { setFormErrors(errors); return; }
 
-    // Se passou na validação:
-    console.log("Lead Capturado com Sucesso:", leadForm);
-    setFormStatus('success');
-    setFormErrors({ email: '', phone: '' });
-    
-    setTimeout(() => {
+    // --- ENVIO PARA GOOGLE SHEETS (CONECTADO!) ---
+    setFormStatus('sending');
+
+    // Link do seu Apps Script
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwY3v9amCacI9BCr2uozFWmz86QMQjwqvDT7jXbJ6KLemmSymxByy09HidpcxFzjh-Olw/exec'; 
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Importante para segurança
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leadForm)
+    })
+    .then(() => {
+        console.log("Sucesso! Lead enviado.");
+        setFormStatus('success');
+        setFormErrors({ email: '', phone: '' });
+        
+        setTimeout(() => {
+            setFormStatus('idle');
+            setLeadForm({ name: '', email: '', phone: '' });
+        }, 4000);
+    })
+    .catch((error) => {
+        console.error("Erro ao salvar:", error);
+        alert("Erro ao salvar. Tente novamente.");
         setFormStatus('idle');
-        setLeadForm({ name: '', email: '', phone: '' });
-    }, 4000);
+    });
   };
 
   const handleShare = (product: Product) => {
@@ -329,7 +343,7 @@ const App = () => {
                   <LinkIcon size={16} />
                 </button>
 
-                {/* IMAGEM PADRONIZADA */}
+                {/* IMAGEM PADRONIZADA (Caixa Fixa) */}
                 <div className="w-full h-48 bg-white p-4 flex items-center justify-center border-b border-gray-50 relative">
                   <img 
                     src={product.image} 
@@ -438,8 +452,8 @@ const App = () => {
                             </div>
                         </div>
                         
-                        <button type="submit" className="w-full mt-6 bg-primary hover:bg-orange-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2">
-                            QUERO ENTRAR NO CLUBE <ArrowRight size={18} />
+                        <button type="submit" disabled={formStatus === 'sending'} className="w-full mt-6 bg-primary hover:bg-orange-600 text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/50 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            {formStatus === 'sending' ? <RefreshCw className="animate-spin" /> : <>QUERO ENTRAR NO CLUBE <ArrowRight size={18} /></>}
                         </button>
                         
                         <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-gray-400 opacity-80">
