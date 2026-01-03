@@ -118,5 +118,65 @@
     "validity": "2026-01-10",
     "discount": 44,
     "link": "https://mercadolivre.com/sec/29p6ZJy"
+  },
+  {
+    "id": "1767433830142",
+    "title": "Xiaomi Poco X7 5G, 256GB/8GB RAM, 50MP, Global",
+    "oldPrice": 2250,
+    "newPrice": 1696,
+    "image": "https://down-br.img.susercontent.com/file/br-11134207-7r98o-m51mwiv59opc9d@resize_w900_nl.webp",
+    "store": "Shopee",
+    "category": "celulares",
+    "validity": "2026-01-04",
+    "discount": 25,
+    "link": "https://s.shopee.com.br/7fTHPkl8Wf"
+  },
+  {
+    "id": "1767433911441",
+    "title": "Ventilador Turbo de Chão 6 Pás Silencioso Coluna Pedestal",
+    "oldPrice": 261.88,
+    "newPrice": 176.79,
+    "image": "https://down-br.img.susercontent.com/file/br-11134207-7r98o-m7gic96eumocc9@resize_w900_nl.webp",
+    "store": "Shopee",
+    "category": "eletronicos",
+    "validity": "2026-01-04",
+    "discount": 32,
+    "link": "https://s.shopee.com.br/7fTHPqn2mp"
+  },
+  {
+    "id": "1767433971801",
+    "title": "Bicicleta Andador Equilíbrio Pedal Zippy",
+    "oldPrice": 179.9,
+    "newPrice": 89.91,
+    "image": "https://m.media-amazon.com/images/I/5154Ft-1G6L._AC_SX679_.jpg",
+    "store": "Amazon",
+    "category": "bebes",
+    "validity": "2026-01-04",
+    "discount": 50,
+    "link": "https://amzn.to/49jiVi1"
+  },
+  {
+    "id": "1767434075104",
+    "title": "ECOLAPIS 12+3 CARAS & CORES, Faber-Castell",
+    "oldPrice": 25,
+    "newPrice": 16.92,
+    "image": "https://m.media-amazon.com/images/I/61qCatoO2DL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-01-10",
+    "discount": 32,
+    "link": "https://amzn.to/3YSoNd4"
+  },
+  {
+    "id": "1767434134853",
+    "title": "EcoLapis de Cor Faber-Castell 60 Cores, Faber-Castell",
+    "oldPrice": 140,
+    "newPrice": 75.51,
+    "image": "https://m.media-amazon.com/images/I/71pkMkauNnL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-01-10",
+    "discount": 46,
+    "link": "https://amzn.to/3YmreEF"
   }
 ]
