@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home, User, 
   ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight,
-  ShoppingBag, Zap, Sparkles, Filter, ArrowUpDown, Store
+  ShoppingBag, Zap, Sparkles, Filter 
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS (EXPANDIDA PARA SINCRONIZAR COM GERADOR) ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS (SINCRONIZADA COM O GERADOR) ---
 const LOCAL_CATEGORIES = [
   { id: 'all', label: 'Tudo' },
   { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
@@ -18,15 +18,15 @@ const LOCAL_CATEGORIES = [
   { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
   { id: 'livros', label: 'Livros' },
   { id: 'moda', label: 'Moda' },
-  { id: 'bolsas', label: 'Bolsas' }, // Adicionado
+  { id: 'bolsas', label: 'Bolsas' },
   { id: 'bebes', label: 'Infantil' },
-  { id: 'brinquedos', label: 'Brinquedos' }, // Adicionado
+  { id: 'brinquedos', label: 'Brinquedos' },
   { id: 'games', label: 'Games' },
   { id: 'saude', label: 'Saúde' },
   { id: 'esportes', label: 'Esportes' },
-  { id: 'ferramentas', label: 'Ferramentas' }, // Adicionado
-  { id: 'automotivo', label: 'Automotivo' }, // Adicionado
-  { id: 'alimentos', label: 'Alimentos' }, // Adicionado
+  { id: 'ferramentas', label: 'Ferramentas' },
+  { id: 'automotivo', label: 'Automotivo' },
+  { id: 'alimentos', label: 'Alimentos' },
   { id: 'pets', label: 'Pets' },
 ];
 
@@ -42,9 +42,9 @@ const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // NOVOS ESTADOS PARA FILTROS
-  const [sortBy, setSortBy] = useState<'relevance' | 'price-asc' | 'price-desc' | 'alpha'>('relevance');
-  const [filterStore, setFilterStore] = useState<'all' | 'Amazon' | 'Shopee'>('all');
+  // ESTADOS DE FILTRO (Mantive a lógica, removi os ícones quebrados)
+  const [sortBy, setSortBy] = useState('relevance');
+  const [filterStore, setFilterStore] = useState('all');
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -68,7 +68,6 @@ const App = () => {
     fetchPromocoes();
   }, []);
 
-  // --- LÓGICA DE SLIDES (Mantida V.4.0) ---
   const heroSlides = useMemo(() => {
     const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
     let mainSlide = {
@@ -99,23 +98,18 @@ const App = () => {
   const prevSlide = useCallback(() => { setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1)); }, [heroSlides.length]);
   useEffect(() => { if (!heroSlides.length || isHovered) return; const timer = setInterval(() => { nextSlide(); }, 5000); return () => clearInterval(timer); }, [heroSlides.length, isHovered, nextSlide]);
 
-  // --- FILTRAGEM E ORDENAÇÃO (ATUALIZADO V.4.1) ---
   const filteredProducts = useMemo(() => {
     let result = products.filter((p) => {
-      // 1. Validade
       if (new Date(p.validity) < new Date().setHours(0,0,0,0)) return false;
       
-      // 2. Categoria
       if (activeCategory === 'volta-aulas') {
           if (!['papelaria', 'livros', 'informatica', 'tech', 'mochilas'].includes(p.category)) return false;
       } else if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados') {
           if (p.category !== activeCategory) return false;
       }
       
-      // 3. Busca Texto
       if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       
-      // 4. Filtro de Loja
       if (filterStore !== 'all') {
           if (!p.store.toLowerCase().includes(filterStore.toLowerCase())) return false;
       }
@@ -123,7 +117,6 @@ const App = () => {
       return true;
     });
 
-    // 5. Ordenação
     if (sortBy === 'price-asc') {
         result.sort((a, b) => a.newPrice - b.newPrice);
     } else if (sortBy === 'price-desc') {
@@ -131,12 +124,10 @@ const App = () => {
     } else if (sortBy === 'alpha') {
         result.sort((a, b) => a.title.localeCompare(b.title));
     }
-    // 'relevance' mantém a ordem original do JSON (novos primeiro geralmente)
 
     return result;
   }, [activeCategory, searchQuery, products, filterStore, sortBy]);
 
-  // ... (Forms e Share mantidos) ...
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ''); if (value.length > 11) value = value.slice(0, 11);
     if (value.length > 2) { value = `(${value.slice(0, 2)}) ${value.slice(2)}`; if (value.length > 10) value = `${value.slice(0, 10)}-${value.slice(10)}`; }
@@ -235,10 +226,9 @@ const App = () => {
         </section>
       )}
 
-      {/* MAIN CONTENT + BARRA DE FERRAMENTAS */}
+      {/* MAIN CONTENT + BARRA DE FERRAMENTAS (SEGURA) */}
       <main className="container mx-auto px-4 py-8" id="promo-list">
         
-        {/* BARRA DE FERRAMENTAS (NOVO) */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
                 <Zap className="text-primary animate-pulse" size={20}/>
@@ -247,14 +237,14 @@ const App = () => {
                 </h2>
             </div>
 
-            {/* FILTROS E ORDENAÇÃO */}
+            {/* FILTROS E ORDENAÇÃO (SEM ÍCONES EXTERNOS PARA EVITAR CRASH) */}
             <div className="flex gap-2 w-full md:w-auto overflow-x-auto hide-scroll pb-1">
                 <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
-                    <ArrowUpDown size={14} className="text-gray-400"/>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">Ordenar:</span>
                     <select 
                         className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer"
                         value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
+                        onChange={(e) => setSortBy(e.target.value)}
                     >
                         <option value="relevance">Mais Relevantes</option>
                         <option value="price-asc">Menor Preço</option>
@@ -264,11 +254,11 @@ const App = () => {
                 </div>
 
                 <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
-                    <Store size={14} className="text-gray-400"/>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">Loja:</span>
                     <select 
                         className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer"
                         value={filterStore}
-                        onChange={(e) => setFilterStore(e.target.value as any)}
+                        onChange={(e) => setFilterStore(e.target.value)}
                     >
                         <option value="all">Todas as Lojas</option>
                         <option value="Amazon">Amazon</option>
@@ -307,7 +297,7 @@ const App = () => {
         )}
       </main>
 
-      {/* CLUBE VIP (RODAPÉ) */}
+      {/* RODAPÉ E MODAIS (IGUAL V.4.0) */}
       <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
