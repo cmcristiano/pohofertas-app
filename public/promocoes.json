@@ -83,4 +83,28 @@
     discount: 16,
     link: 'https://amzn.to/4qB5HEi'
   },
+  {
+    id: '1767431399108',
+    title: 'Creatina Monohidratada Pura 1kg Dark Lab Unidade Sem sabor',
+    oldPrice: 129.9,
+    newPrice: 69.9,
+    image: 'https://http2.mlstatic.com/D_NQ_NP_2X_848860-MLA99964507641_112025-F.webp',
+    store: 'Mercado Livre',
+    category: 'novos',
+    validity: '2026-01-10',
+    discount: 46,
+    link: 'https://mercadolivre.com/sec/1um4YuN'
+  },
+  {
+    id: '1767431500663',
+    title: 'Tênis Kappa Pulse Lt Masculino Feminino',
+    oldPrice: 269.99,
+    newPrice: 159.9,
+    image: 'https://http2.mlstatic.com/D_NQ_NP_2X_936354-MLB96156885690_102025-F-tnis-kappa-pulse-lt-masculino-feminino.webp',
+    store: 'Mercado Live',
+    category: 'novos',
+    validity: '2026-01-10',
+    discount: 41,
+    link: 'https://mercadolivre.com/sec/2QKJTXw'
+  },
 ]
