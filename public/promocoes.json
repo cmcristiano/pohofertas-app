@@ -101,10 +101,22 @@
     "oldPrice": 269.99,
     "newPrice": 159.9,
     "image": "https://http2.mlstatic.com/D_NQ_NP_2X_936354-MLB96156885690_102025-F-tnis-kappa-pulse-lt-masculino-feminino.webp",
-    "store": "Mercado Livre",
+    "store": "Mercado Live",
     "category": "novos",
     "validity": "2026-01-10",
     "discount": 41,
     "link": "https://mercadolivre.com/sec/2QKJTXw"
+  },
+  {
+    "id": "1767433391099",
+    "title": "Robô aspirador Robot W90 varre aspira e passa pano 30W",
+    "oldPrice": 514.44,
+    "newPrice": 287.91,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_2X_748103-MLA99906601653_112025-F.webp",
+    "store": "Amazon",
+    "category": "casa",
+    "validity": "2026-01-10",
+    "discount": 44,
+    "link": "https://mercadolivre.com/sec/29p6ZJy"
   }
 ]
