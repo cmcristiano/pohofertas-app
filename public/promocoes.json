@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "1767652977843",
+    "title": "Kit 44 Lápis de Cor (24 Cores + Tom Pastel + Tons de Pele)",
+    "oldPrice": 39.99,
+    "newPrice": 17.99,
+    "image": "https://down-br.img.susercontent.com/file/br-11134207-7r98o-m0x70wqf1bgg37@resize_w450_nl.webp",
+    "store": "Shopee",
+    "category": "papelaria",
+    "validity": "2026-01-30",
+    "discount": 55,
+    "link": "https://s.shopee.com.br/8V2SS6E6i9"
+  },
+  {
+    "id": "1767653064673",
+    "title": "Pentel Fita Corretiva Azul + Refil SM/ZTP205R-S",
+    "oldPrice": 18.4,
+    "newPrice": 13.2,
+    "image": "https://m.media-amazon.com/images/I/51kzguK35ES._AC_SY355_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-01-30",
+    "discount": 28,
+    "link": "https://amzn.to/4jrzQDL"
+  }
+]
