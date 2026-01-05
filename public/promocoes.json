@@ -22,5 +22,65 @@
     "validity": "2026-01-30",
     "discount": 28,
     "link": "https://amzn.to/4jrzQDL"
+  },
+  {
+    "id": "1767653290142",
+    "title": "Tilibra Caderno Universitário 10 Matérias Espiral 160 Fls",
+    "oldPrice": 24.79,
+    "newPrice": 17.26,
+    "image": "https://m.media-amazon.com/images/I/41MAVv4bJPL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "volta-aulas",
+    "validity": "2026-01-30",
+    "discount": 30,
+    "link": "https://amzn.to/4sqBFor"
+  },
+  {
+    "id": "1767653321755",
+    "title": "Caderno Alibombom Brochurão Verde Numerado",
+    "oldPrice": 0,
+    "newPrice": 24.99,
+    "image": "https://m.media-amazon.com/images/I/61XhXehB8UL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-01-30",
+    "discount": 0,
+    "link": "https://amzn.to/4juXHlY"
+  },
+  {
+    "id": "1767653375349",
+    "title": "Confetti - Caderno Universitário Ouro 10x1 160 Folhas Pautado Marrom/Branco",
+    "oldPrice": 23.92,
+    "newPrice": 17.29,
+    "image": "https://m.media-amazon.com/images/I/71EMTuFlndL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-01-30",
+    "discount": 28,
+    "link": "https://amzn.to/4996qH4"
+  },
+  {
+    "id": "1767653436633",
+    "title": "Tilibra Universitário D+ - Caderno Brochura Capa Dura",
+    "oldPrice": 0,
+    "newPrice": 10.9,
+    "image": "https://m.media-amazon.com/images/I/41lOFoHnlzL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "papelaria",
+    "validity": "2026-01-30",
+    "discount": 0,
+    "link": "https://amzn.to/3NwLK32"
+  },
+  {
+    "id": "1767653479492",
+    "title": "Caderno Kraft Pontado Cicero 14x21 (Médio)",
+    "oldPrice": 41.99,
+    "newPrice": 28.69,
+    "image": "https://m.media-amazon.com/images/I/71a-ZxUUoPL._AC_SX522_.jpg",
+    "store": "Amazon",
+    "category": "volta-aulas",
+    "validity": "2026-01-30",
+    "discount": 32,
+    "link": "https://amzn.to/49GIPxp"
   }
 ]
