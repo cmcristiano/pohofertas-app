@@ -413,10 +413,7 @@ const App = () => {
       </main>
 
       {/* RODAPÉ E MODAIS */}
-      <section <section
-  id="vip"
-  className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden"
->
+      <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
          <div className="max-w-xl mx-auto text-center relative z-10">
