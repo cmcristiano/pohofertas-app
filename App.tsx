@@ -1,5 +1,3 @@
-me entrega no modo blindado pronto.
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home as HomeIcon, User, 
