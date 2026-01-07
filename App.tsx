@@ -143,10 +143,10 @@ const LOCAL_CATEGORIES = [
 
 const SLIDE_COLORS = [
   'bg-gradient-to-r from-orange-600 to-orange-500', 
-  'bg-gradient-to-r from-blue-600 to-indigo-700',   
+  'bg-gradient-to-r from-blue-600 to-indigo-700',    
   'bg-gradient-to-r from-emerald-500 to-green-700',
   'bg-gradient-to-r from-purple-600 to-pink-600', 
-  'bg-gradient-to-r from-red-600 to-orange-500',    
+  'bg-gradient-to-r from-red-600 to-orange-500',      
 ];
 
 const App = () => {
@@ -265,8 +265,28 @@ const App = () => {
     <div className="min-h-screen bg-gray-50 font-sans">
        <style>{`.hide-scroll::-webkit-scrollbar {display: none} .hide-scroll {-ms-overflow-style: none; scrollbar-width: none;}`}</style>
 
+      {/* --- NOVO BANNER HERO (CTA DE TOPO) --- */}
+      <div className="bg-secondary text-white py-6 px-4 shadow-xl border-b-4 border-primary relative z-50">
+          <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-xl md:text-3xl font-bold mb-2 flex justify-center items-center gap-2">
+                  🦁 Não pague mais caro!
+              </h1>
+              <p className="text-gray-200 mb-5 text-xs md:text-base leading-relaxed">
+                  As melhores ofertas duram poucos minutos. Receba os <span className="text-primary font-bold">links secretos</span> e cupons direto no seu celular.
+              </p>
+              
+              <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" rel="noreferrer"
+                 className="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 active:scale-95 animate-pulse text-sm md:text-lg w-full md:w-auto gap-2">
+                  🚀 ENTRAR NO GRUPO VIP
+              </a>
+              
+              <p className="text-[10px] text-gray-400 mt-3">Junte-se a milhares de economizadores</p>
+          </div>
+      </div>
+      {/* --- FIM DO BANNER HERO --- */}
+
       {/* TOP STRIPE */}
-      <div className="bg-secondary text-white text-[10px] py-1 px-3 flex justify-between items-center z-50">
+      <div className="bg-secondary text-white text-[10px] py-1 px-3 flex justify-between items-center z-50 border-t border-white/10">
         <span className="font-bold">OFERTAS SELECIONADAS POR CRIS MELLO 🧡</span>
         <div className="flex gap-3"><Instagram size={12}/><Facebook size={12}/></div>
       </div>
@@ -395,8 +415,8 @@ const App = () => {
                 </div>
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
-                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 px-1.5 py-0.5 rounded">{p.store}</span>
-                     {p.category === 'volta-aulas' && <span className="text-[10px] text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded font-bold">ESCOLA</span>}
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 px-1.5 py-0.5 rounded">{p.store}</span>
+                      {p.category === 'volta-aulas' && <span className="text-[10px] text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded font-bold">ESCOLA</span>}
                   </div>
                   <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 h-10 mb-2 leading-tight group-hover:text-primary transition">{p.title}</h3>
                   <div className="flex flex-col mb-3">
