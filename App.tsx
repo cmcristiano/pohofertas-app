@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home as HomeIcon, User, 
   ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight,
-  ShoppingBag, Zap, Sparkles 
+  ShoppingBag, Zap, Sparkles, Star, Quote
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
@@ -36,6 +36,14 @@ const SLIDE_COLORS = [
   'bg-gradient-to-r from-emerald-500 to-green-700',
   'bg-gradient-to-r from-purple-600 to-pink-600', 
   'bg-gradient-to-r from-red-600 to-orange-500',      
+];
+
+// --- NOVOS DEPOIMENTOS ---
+const TESTIMONIALS = [
+  { name: 'Fernanda L.', store: 'Shein', text: 'O vestido pro Ano Novo ficou perfeito! O tecido é ótimo e paguei super barato seguindo a dica.', avatar: 'FL' },
+  { name: 'Mariana S.', store: 'Shopee', text: 'Segui a dica do Cris e peguei a AirFryer com 40% de desconto. Chegou certinho!', avatar: 'MS' },
+  { name: 'Ricardo M.', store: 'Amazon', text: 'Comprei o Kindle na promoção que vi aqui no PohOfertas. A entrega foi surreal de rápida.', avatar: 'RM' },
+  { name: 'João P.', store: 'Mercado Livre', text: 'Celular novo chegou no dia seguinte com o cupom que peguei no grupo VIP. Top!', avatar: 'JP' },
 ];
 
 const App = () => {
@@ -187,14 +195,12 @@ const App = () => {
         </nav>
       </header>
 
-      {/* --- SESSÃO DE CAPTURA DE LEAD (MOVIDA PARA O TOPO) --- */}
-      {/* Esta seção agora é a primeira coisa que o usuário vê */}
+      {/* --- SESSÃO DE CAPTURA DE LEAD (TOPO) --- */}
       <section className="bg-secondary text-white py-8 px-4 relative overflow-hidden shadow-2xl z-30">
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
          
          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 relative z-10">
-            {/* Texto de Impacto */}
             <div className="w-full md:w-1/2 text-center md:text-left">
                 <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border border-white/20">
                     <Sparkles size={12} className="text-yellow-400 animate-pulse"/> CLUBE POH VIP
@@ -207,7 +213,6 @@ const App = () => {
                 </p>
             </div>
 
-            {/* Formulário de Captura */}
             <div className="w-full md:w-1/2 bg-white/5 p-5 md:p-6 rounded-2xl border border-white/10 backdrop-blur-sm shadow-inner">
                 {formStatus === 'success' ? (
                     <div className="h-full flex flex-col justify-center items-center py-8 text-green-200 animate-in fade-in zoom-in">
@@ -230,7 +235,7 @@ const App = () => {
          </div>
       </section>
 
-      {/* CARROSSEL (Agora abaixo do formulário) */}
+      {/* CARROSSEL */}
       {heroSlides.length > 0 && (
         <section className="relative w-full h-[180px] md:h-[300px] overflow-hidden bg-gray-200 group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           {heroSlides.map((slide, index) => {
@@ -271,7 +276,7 @@ const App = () => {
         </section>
       )}
 
-      {/* MAIN CONTENT + BARRA DE FERRAMENTAS */}
+      {/* MAIN CONTENT */}
       <main className="container mx-auto px-4 py-8" id="promo-list">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
@@ -280,30 +285,20 @@ const App = () => {
                 {activeCategory === 'all' ? '🔥 Ofertas Quentes' : `Melhores de ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label}`}
                 </h2>
             </div>
-
-            {/* FILTROS E ORDENAÇÃO */}
+            {/* FILTROS */}
             <div className="flex gap-2 w-full md:w-auto overflow-x-auto hide-scroll pb-1">
                 <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
                     <span className="text-[10px] text-gray-400 font-bold uppercase">Ordenar:</span>
-                    <select 
-                        className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                    >
+                    <select className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                         <option value="relevance">Mais Relevantes</option>
                         <option value="price-asc">Menor Preço</option>
                         <option value="price-desc">Maior Preço</option>
                         <option value="alpha">A-Z</option>
                     </select>
                 </div>
-
                 <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
                     <span className="text-[10px] text-gray-400 font-bold uppercase">Loja:</span>
-                    <select 
-                        className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer"
-                        value={filterStore}
-                        onChange={(e) => setFilterStore(e.target.value)}
-                    >
+                    <select className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer" value={filterStore} onChange={(e) => setFilterStore(e.target.value)}>
                         <option value="all">Todas as Lojas</option>
                         <option value="Amazon">Amazon</option>
                         <option value="Shopee">Shopee</option>
@@ -341,10 +336,43 @@ const App = () => {
         )}
       </main>
 
+      {/* --- SEÇÃO DE PROVA SOCIAL (NOVO) --- */}
+      <section className="container mx-auto px-4 py-8 mb-8">
+        <div className="flex items-center gap-2 mb-6">
+            <Quote className="text-primary" size={24}/>
+            <h2 className="text-xl font-black text-gray-800 uppercase">Quem segue, economiza</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {TESTIMONIALS.map((t, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-sm">
+                            {t.avatar}
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-800">{t.name}</p>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">{t.store}</span>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 text-sm italic mb-4">"{t.text}"</p>
+                    <div className="flex text-yellow-400 gap-0.5">
+                        <Star size={14} fill="currentColor"/>
+                        <Star size={14} fill="currentColor"/>
+                        <Star size={14} fill="currentColor"/>
+                        <Star size={14} fill="currentColor"/>
+                        <Star size={14} fill="currentColor"/>
+                    </div>
+                </div>
+            ))}
+        </div>
+      </section>
+
       <footer className="bg-white border-t py-8 text-center">
           <p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p>
           <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
       </footer>
+      
+      {/* MOBILE NAV */}
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
         <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><HomeIcon size={20}/><span className="text-[10px] font-medium mt-1">Início</span></button>
         <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400 hover:text-gray-600"><Search size={20}/><span className="text-[10px] font-medium mt-1">Buscar</span></button>
