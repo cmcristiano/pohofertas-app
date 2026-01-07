@@ -7,22 +7,24 @@ import {
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS (ATUALIZADO V31.1) ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS (ATUALIZADO V31.2 - Novas Imagens) ---
 const LOCAL_CATEGORIES = [
   { id: 'all', label: 'Tudo' },
   { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
-  { id: 'papelaria', label: '✂️ Papelaria', banner: 'https://images.unsplash.com/photo-1531297461136-82lwDe402434?auto=format&fit=crop&q=80&w=2070', title: 'Escritório & Estudos', sub: 'Cadernos, Canetas e Organização ✂️' }, // ADICIONADO
+  { id: 'papelaria', label: '✂️ Papelaria', banner: 'https://images.unsplash.com/photo-1531297461136-82lwDe402434?auto=format&fit=crop&q=80&w=2070', title: 'Escritório & Estudos', sub: 'Cadernos, Canetas e Organização ✂️' },
   { id: 'achados', label: 'Achadinhos', banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', title: 'Achadinhos Imperdíveis', sub: 'As melhores ofertas da Shopee e Amazon 🔥' },
   { id: 'tech', label: 'Tecnologia', banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', title: 'Mundo Tech', sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' },
-  { id: 'calcados', label: '👟 Calçados', banner: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=2070', title: 'Sneakers & Calçados', sub: 'Conforto e estilo para seus pés 👟' }, // ADICIONADO
-  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
-  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
-  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
+  { id: 'calcados', label: '👟 Calçados', banner: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=2070', title: 'Sneakers & Calçados', sub: 'Conforto e estilo para seus pés 👟' },
+  
+  // IMAGENS ATUALIZADAS AQUI ABAIXO:
+  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
+  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4f9d?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
+  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1612817288484-9691c95b6780?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
   { id: 'livros', label: 'Livros', banner: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=2070', title: 'Estante Literária', sub: 'Os melhores títulos com desconto 📚' },
   { id: 'moda', label: 'Moda', banner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=2070', title: 'Estilo & Tendência', sub: 'Roupas e acessórios para você brilhar 👗' },
   { id: 'bolsas', label: 'Bolsas', banner: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=2070', title: 'Bolsas & Acessórios', sub: 'Complete seu look com elegância 👜' },
   { id: 'bebes', label: 'Infantil', banner: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=2070', title: 'Mundo dos Pequenos', sub: 'Fraldas, Roupas e Carinho 👶' },
-  { id: 'brinquedos', label: 'Brinquedos', banner: 'https://images.unsplash.com/photo-1566576912902-1b6b7dd88d02?auto=format&fit=crop&q=80&w=2070', title: 'Hora da Diversão', sub: 'Brinquedos para todas as idades 🧸' },
+  { id: 'brinquedos', label: 'Brinquedos', banner: 'https://images.unsplash.com/photo-1559863473-1c2a13e54721?auto=format&fit=crop&q=80&w=2070', title: 'Hora da Diversão', sub: 'Brinquedos para todas as idades 🧸' }, // NOVA IMAGEM
   { id: 'games', label: 'Games', banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070', title: 'Zona Gamer', sub: 'Consoles, Jogos e Periféricos 🎮' },
   { id: 'saude', label: 'Saúde', banner: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=2070', title: 'Saúde & Bem-Estar', sub: 'Vitaminas e cuidados pessoais 💊' },
   { id: 'esportes', label: 'Esportes', banner: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=2070', title: 'Vida Fitness', sub: 'Equipamentos e roupas esportivas ⚽' },
