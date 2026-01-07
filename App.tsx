@@ -7,138 +7,27 @@ import {
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS (AGORA 100% PREENCHIDAS COM BANNERS) ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS ---
 const LOCAL_CATEGORIES = [
-  { 
-    id: 'all', 
-    label: 'Tudo' 
-  },
-  { 
-    id: 'volta-aulas', 
-    label: '✏️ Volta às Aulas', 
-    banner: '/banner-escola.jpg', 
-    title: 'Volta às Aulas 2026', 
-    sub: 'Material Escolar com Preço de Atacado 🎒' 
-  },
-  { 
-    id: 'achados', 
-    label: 'Achadinhos', 
-    banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Achadinhos Imperdíveis', 
-    sub: 'As melhores ofertas da Shopee e Amazon 🔥' 
-  },
-  { 
-    id: 'tech', 
-    label: 'Tecnologia', 
-    banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Mundo Tech', 
-    sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' 
-  },
-  { 
-    id: 'cozinha', 
-    label: 'Cozinha', 
-    banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Chef em Casa', 
-    sub: 'Tudo para equipar sua cozinha 🍳' 
-  },
-  { 
-    id: 'casa', 
-    label: 'Casa', 
-    banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Casa & Conforto', 
-    sub: 'Decoração e utilidades para o seu lar 🏠' 
-  },
-  { 
-    id: 'beleza', 
-    label: 'Beleza', 
-    banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Cuidados & Beleza', 
-    sub: 'Skincare, Maquiagem e Perfumes ✨' 
-  },
-  { 
-    id: 'livros', 
-    label: 'Livros', 
-    banner: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Estante Literária', 
-    sub: 'Os melhores títulos com desconto 📚' 
-  },
-  { 
-    id: 'moda', 
-    label: 'Moda', 
-    banner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Estilo & Tendência', 
-    sub: 'Roupas e acessórios para você brilhar 👗' 
-  },
-  { 
-    id: 'bolsas', 
-    label: 'Bolsas', 
-    banner: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Bolsas & Acessórios', 
-    sub: 'Complete seu look com elegância 👜' 
-  },
-  { 
-    id: 'bebes', 
-    label: 'Infantil', 
-    banner: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Mundo dos Pequenos', 
-    sub: 'Fraldas, Roupas e Carinho 👶' 
-  },
-  { 
-    id: 'brinquedos', 
-    label: 'Brinquedos', 
-    banner: 'https://images.unsplash.com/photo-1566576912902-1b6b7dd88d02?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Hora da Diversão', 
-    sub: 'Brinquedos para todas as idades 🧸' 
-  },
-  { 
-    id: 'games', 
-    label: 'Games', 
-    banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Zona Gamer', 
-    sub: 'Consoles, Jogos e Periféricos 🎮' 
-  },
-  { 
-    id: 'saude', 
-    label: 'Saúde', 
-    banner: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Saúde & Bem-Estar', 
-    sub: 'Vitaminas e cuidados pessoais 💊' 
-  },
-  { 
-    id: 'esportes', 
-    label: 'Esportes', 
-    banner: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Vida Fitness', 
-    sub: 'Equipamentos e roupas esportivas ⚽' 
-  },
-  { 
-    id: 'ferramentas', 
-    label: 'Ferramentas', 
-    banner: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Faça Você Mesmo', 
-    sub: 'Ferramentas profissionais e hobby 🛠️' 
-  },
-  { 
-    id: 'automotivo', 
-    label: 'Automotivo', 
-    banner: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Seu Carro Merece', 
-    sub: 'Acessórios e cuidados automotivos 🚗' 
-  },
-  { 
-    id: 'alimentos', 
-    label: 'Alimentos', 
-    banner: 'https://images.unsplash.com/photo-1506484381205-f7945653044d?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Mercado em Casa', 
-    sub: 'Snacks, Bebidas e Despensa 🍫' 
-  },
-  { 
-    id: 'pets', 
-    label: 'Pets', 
-    banner: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&q=80&w=2070', 
-    title: 'Amor de 4 Patas', 
-    sub: 'Ração, Brinquedos e Mimos 🐶' 
-  },
+  { id: 'all', label: 'Tudo' },
+  { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
+  { id: 'achados', label: 'Achadinhos', banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', title: 'Achadinhos Imperdíveis', sub: 'As melhores ofertas da Shopee e Amazon 🔥' },
+  { id: 'tech', label: 'Tecnologia', banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', title: 'Mundo Tech', sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' },
+  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
+  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
+  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
+  { id: 'livros', label: 'Livros', banner: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=2070', title: 'Estante Literária', sub: 'Os melhores títulos com desconto 📚' },
+  { id: 'moda', label: 'Moda', banner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=2070', title: 'Estilo & Tendência', sub: 'Roupas e acessórios para você brilhar 👗' },
+  { id: 'bolsas', label: 'Bolsas', banner: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=2070', title: 'Bolsas & Acessórios', sub: 'Complete seu look com elegância 👜' },
+  { id: 'bebes', label: 'Infantil', banner: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=2070', title: 'Mundo dos Pequenos', sub: 'Fraldas, Roupas e Carinho 👶' },
+  { id: 'brinquedos', label: 'Brinquedos', banner: 'https://images.unsplash.com/photo-1566576912902-1b6b7dd88d02?auto=format&fit=crop&q=80&w=2070', title: 'Hora da Diversão', sub: 'Brinquedos para todas as idades 🧸' },
+  { id: 'games', label: 'Games', banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070', title: 'Zona Gamer', sub: 'Consoles, Jogos e Periféricos 🎮' },
+  { id: 'saude', label: 'Saúde', banner: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=2070', title: 'Saúde & Bem-Estar', sub: 'Vitaminas e cuidados pessoais 💊' },
+  { id: 'esportes', label: 'Esportes', banner: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=2070', title: 'Vida Fitness', sub: 'Equipamentos e roupas esportivas ⚽' },
+  { id: 'ferramentas', label: 'Ferramentas', banner: 'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&q=80&w=2070', title: 'Faça Você Mesmo', sub: 'Ferramentas profissionais e hobby 🛠️' },
+  { id: 'automotivo', label: 'Automotivo', banner: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=2070', title: 'Seu Carro Merece', sub: 'Acessórios e cuidados automotivos 🚗' },
+  { id: 'alimentos', label: 'Alimentos', banner: 'https://images.unsplash.com/photo-1506484381205-f7945653044d?auto=format&fit=crop&q=80&w=2070', title: 'Mercado em Casa', sub: 'Snacks, Bebidas e Despensa 🍫' },
+  { id: 'pets', label: 'Pets', banner: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&q=80&w=2070', title: 'Amor de 4 Patas', sub: 'Ração, Brinquedos e Mimos 🐶' },
 ];
 
 const SLIDE_COLORS = [
@@ -153,7 +42,7 @@ const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // ESTADOS DE FILTRO (Simples e Seguros)
+  // ESTADOS DE FILTRO
   const [sortBy, setSortBy] = useState('relevance');
   const [filterStore, setFilterStore] = useState('all');
 
@@ -161,9 +50,12 @@ const App = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // ESTADO DO FORMULÁRIO DE LEADS
   const [leadForm, setLeadForm] = useState({ name: '', email: '', phone: '' });
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success'>('idle');
   const [formErrors, setFormErrors] = useState({ email: '', phone: '' });
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -182,13 +74,13 @@ const App = () => {
   const heroSlides = useMemo(() => {
     const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
     
-    // Banner Principal (Agora usa a imagem específica da categoria)
+    // Banner Principal
     let mainSlide = {
         id: 'main-hero', 
         color: SLIDE_COLORS[0],
         text: currentCatConfig.title || 'As Melhores Ofertas', 
         sub: currentCatConfig.sub || 'Garimpadas diariamente para você 🧡',
-        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', // Fallback seguro
+        img: currentCatConfig.banner || 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', 
         link: '#promo-list',
         isFullBanner: true 
     };
@@ -224,21 +116,15 @@ const App = () => {
       }
       
       if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      
       if (filterStore !== 'all') {
           if (!p.store.toLowerCase().includes(filterStore.toLowerCase())) return false;
       }
-
       return true;
     });
 
-    if (sortBy === 'price-asc') {
-        result.sort((a, b) => a.newPrice - b.newPrice);
-    } else if (sortBy === 'price-desc') {
-        result.sort((a, b) => b.newPrice - a.newPrice);
-    } else if (sortBy === 'alpha') {
-        result.sort((a, b) => a.title.localeCompare(b.title));
-    }
+    if (sortBy === 'price-asc') result.sort((a, b) => a.newPrice - b.newPrice);
+    else if (sortBy === 'price-desc') result.sort((a, b) => b.newPrice - a.newPrice);
+    else if (sortBy === 'alpha') result.sort((a, b) => a.title.localeCompare(b.title));
 
     return result;
   }, [activeCategory, searchQuery, products, filterStore, sortBy]);
@@ -248,6 +134,7 @@ const App = () => {
     if (value.length > 2) { value = `(${value.slice(0, 2)}) ${value.slice(2)}`; if (value.length > 10) value = `${value.slice(0, 10)}-${value.slice(10)}`; }
     setLeadForm({ ...leadForm, phone: value }); if (formErrors.phone) setFormErrors({ ...formErrors, phone: '' });
   };
+
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault(); let errors = { email: '', phone: '' }; let isValid = true;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadForm.email)) { errors.email = 'E-mail inválido.'; isValid = false; }
@@ -264,26 +151,6 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
        <style>{`.hide-scroll::-webkit-scrollbar {display: none} .hide-scroll {-ms-overflow-style: none; scrollbar-width: none;}`}</style>
-
-      {/* --- NOVO BANNER HERO (CTA DE TOPO) --- */}
-      <div className="bg-secondary text-white py-6 px-4 shadow-xl border-b-4 border-primary relative z-50">
-          <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-xl md:text-3xl font-bold mb-2 flex justify-center items-center gap-2">
-                  🦁 Não pague mais caro!
-              </h1>
-              <p className="text-gray-200 mb-5 text-xs md:text-base leading-relaxed">
-                  As melhores ofertas duram poucos minutos. Receba os <span className="text-primary font-bold">links secretos</span> e cupons direto no seu celular.
-              </p>
-              
-              <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" rel="noreferrer"
-                 className="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 active:scale-95 animate-pulse text-sm md:text-lg w-full md:w-auto gap-2">
-                  🚀 ENTRAR NO GRUPO VIP
-              </a>
-              
-              <p className="text-[10px] text-gray-400 mt-3">Junte-se a milhares de economizadores</p>
-          </div>
-      </div>
-      {/* --- FIM DO BANNER HERO --- */}
 
       {/* TOP STRIPE */}
       <div className="bg-secondary text-white text-[10px] py-1 px-3 flex justify-between items-center z-50 border-t border-white/10">
@@ -320,7 +187,50 @@ const App = () => {
         </nav>
       </header>
 
-      {/* CARROSSEL */}
+      {/* --- SESSÃO DE CAPTURA DE LEAD (MOVIDA PARA O TOPO) --- */}
+      {/* Esta seção agora é a primeira coisa que o usuário vê */}
+      <section className="bg-secondary text-white py-8 px-4 relative overflow-hidden shadow-2xl z-30">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+         
+         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 relative z-10">
+            {/* Texto de Impacto */}
+            <div className="w-full md:w-1/2 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border border-white/20">
+                    <Sparkles size={12} className="text-yellow-400 animate-pulse"/> CLUBE POH VIP
+                </div>
+                <h2 className="text-2xl md:text-4xl font-black mb-3 leading-tight">
+                    Ofertas Secretas <br/><span className="text-primary">no seu Zap 📲</span>
+                </h2>
+                <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4 md:mb-0">
+                    Não perca tempo procurando. Eu garimpo os melhores preços e te aviso. <br/><b>Cadastre-se para entrar na lista VIP.</b>
+                </p>
+            </div>
+
+            {/* Formulário de Captura */}
+            <div className="w-full md:w-1/2 bg-white/5 p-5 md:p-6 rounded-2xl border border-white/10 backdrop-blur-sm shadow-inner">
+                {formStatus === 'success' ? (
+                    <div className="h-full flex flex-col justify-center items-center py-8 text-green-200 animate-in fade-in zoom-in">
+                        <CheckCircle size={48} className="mb-4 text-green-400"/>
+                        <span className="font-bold text-xl">Cadastro Realizado!</span>
+                        <span className="text-sm text-center mt-2">Vou te adicionar em breve. Fique de olho no Zap!</span>
+                    </div>
+                ) : (
+                    <form onSubmit={handleLeadSubmit} className="space-y-3">
+                        <input type="text" placeholder="Seu Nome" required value={leadForm.name} onChange={e=>setLeadForm({...leadForm, name: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/60 outline-none transition placeholder-gray-500"/>
+                        <input type="tel" placeholder="Seu WhatsApp (com DDD)" required value={leadForm.phone} onChange={handlePhoneChange} className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/60 outline-none transition placeholder-gray-500"/>
+                        
+                        <button type="submit" disabled={formStatus==='sending'} className="w-full bg-primary py-3.5 rounded-lg font-bold text-sm hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-900/20 transition flex justify-center items-center gap-2 mt-2 transform active:scale-95">
+                            {formStatus==='sending' ? <RefreshCw className="animate-spin"/> : <>QUERO ENTRAR NA LISTA VIP <ArrowRight size={16}/></>}
+                        </button>
+                        <div className="text-[10px] text-gray-500 text-center flex justify-center gap-1 mt-2"><ShieldCheck size={10}/> Zero spam. Apenas ofertas reais.</div>
+                    </form>
+                )}
+            </div>
+         </div>
+      </section>
+
+      {/* CARROSSEL (Agora abaixo do formulário) */}
       {heroSlides.length > 0 && (
         <section className="relative w-full h-[180px] md:h-[300px] overflow-hidden bg-gray-200 group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
           {heroSlides.map((slide, index) => {
@@ -363,7 +273,6 @@ const App = () => {
 
       {/* MAIN CONTENT + BARRA DE FERRAMENTAS */}
       <main className="container mx-auto px-4 py-8" id="promo-list">
-        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
                 <Zap className="text-primary animate-pulse" size={20}/>
@@ -432,36 +341,6 @@ const App = () => {
         )}
       </main>
 
-      {/* RODAPÉ E MODAIS */}
-      <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 mt-10 px-4 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-         <div className="max-w-xl mx-auto text-center relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border border-white/20">
-                <Sparkles size={12} className="text-yellow-400"/> CLUBE POH VIP
-            </div>
-            <h2 className="text-3xl font-black mb-3">Ofertas no seu Zap 📲</h2>
-            <p className="text-gray-300 mb-8 leading-relaxed">Não perca tempo procurando. Nossa equipe garimpa os melhores preços e manda direto no seu celular. Sem spam, só desconto real.</p>
-            {formStatus === 'success' ? (
-                <div className="bg-green-500/20 p-6 rounded-xl border border-green-500/50 text-green-200 flex flex-col items-center animate-in fade-in zoom-in duration-300">
-                    <CheckCircle size={32} className="mb-2 text-green-400"/>
-                    <span className="font-bold text-lg">Sucesso!</span>
-                    <span className="text-sm">Você já está na lista VIP. Fique de olho!</span>
-                </div>
-            ) : (
-                <form onSubmit={handleLeadSubmit} className="space-y-3 bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
-                    <input type="text" placeholder="Seu Nome" required value={leadForm.name} onChange={e=>setLeadForm({...leadForm, name: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
-                    <input type="email" placeholder="Seu Melhor E-mail" required value={leadForm.email} onChange={e=>setLeadForm({...leadForm, email: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
-                    <input type="tel" placeholder="Seu WhatsApp (com DDD)" required value={leadForm.phone} onChange={handlePhoneChange} className="w-full px-4 py-3 rounded-lg bg-black/20 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/40 outline-none transition placeholder-gray-500"/>
-                    <button type="submit" disabled={formStatus==='sending'} className="w-full bg-primary py-3.5 rounded-lg font-bold text-sm hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-900/20 transition flex justify-center items-center gap-2 mt-2">
-                        {formStatus==='sending' ? <RefreshCw className="animate-spin"/> : <>ENTRAR NO GRUPO VIP <ArrowRight size={16}/></>}
-                    </button>
-                    <div className="text-[10px] text-gray-500 flex justify-center gap-1 mt-2"><ShieldCheck size={10}/> Seus dados estão 100% seguros conosco.</div>
-                </form>
-            )}
-         </div>
-      </section>
-
       <footer className="bg-white border-t py-8 text-center">
           <p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p>
           <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
@@ -469,7 +348,7 @@ const App = () => {
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
         <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><HomeIcon size={20}/><span className="text-[10px] font-medium mt-1">Início</span></button>
         <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400 hover:text-gray-600"><Search size={20}/><span className="text-[10px] font-medium mt-1">Buscar</span></button>
-        <a href="https://chat.whatsapp.com/JhFnJAuZX6MGo8wpaQ8MAU" target="_blank" className="flex flex-col items-center text-gray-400 hover:text-green-600"><User size={20}/><span className="text-[10px] font-medium mt-1">VIP</span></a>
+        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-gray-400 hover:text-green-600"><User size={20}/><span className="text-[10px] font-medium mt-1">VIP</span></button>
       </nav>
       <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} product={selectedProduct} />
     </div>
