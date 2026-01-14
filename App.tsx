@@ -7,26 +7,20 @@ import {
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS (ATUALIZADO V31.3 - Imagens Completas) ---
+// --- CONFIGURAÇÃO DAS CATEGORIAS ---
 const LOCAL_CATEGORIES = [
-  // Categoria "Tudo" agora tem banner genérico de compras
-  { id: 'all', label: 'Tudo', banner: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&fit=crop&q=80&w=2070', title: 'Todas as Ofertas', sub: 'Explore nosso catálogo completo 🧡' },
-  
-  // "Volta às Aulas" com imagem online (removemos o arquivo local para evitar erros)
-  { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=2070', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
-  
-  { id: 'papelaria', label: '✂️ Papelaria', banner: 'https://images.unsplash.com/photo-1531297461136-82lwDe402434?auto=format&fit=crop&q=80&w=2070', title: 'Escritório & Estudos', sub: 'Cadernos, Canetas e Organização ✂️' },
+  { id: 'all', label: 'Tudo' },
+  { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
   { id: 'achados', label: 'Achadinhos', banner: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070', title: 'Achadinhos Imperdíveis', sub: 'As melhores ofertas da Shopee e Amazon 🔥' },
   { id: 'tech', label: 'Tecnologia', banner: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=2070', title: 'Mundo Tech', sub: 'Gadgets, Celulares e Acessórios com Desconto 💻' },
-  { id: 'calcados', label: '👟 Calçados', banner: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=2070', title: 'Sneakers & Calçados', sub: 'Conforto e estilo para seus pés 👟' },
-  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
-  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4f9d?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
-  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1612817288484-9691c95b6780?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
+  { id: 'cozinha', label: 'Cozinha', banner: 'https://images.unsplash.com/photo-1556910103-1c02745a30bf?auto=format&fit=crop&q=80&w=2070', title: 'Chef em Casa', sub: 'Tudo para equipar sua cozinha 🍳' },
+  { id: 'casa', label: 'Casa', banner: 'https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&q=80&w=2070', title: 'Casa & Conforto', sub: 'Decoração e utilidades para o seu lar 🏠' },
+  { id: 'beleza', label: 'Beleza', banner: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=2070', title: 'Cuidados & Beleza', sub: 'Skincare, Maquiagem e Perfumes ✨' },
   { id: 'livros', label: 'Livros', banner: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=2070', title: 'Estante Literária', sub: 'Os melhores títulos com desconto 📚' },
   { id: 'moda', label: 'Moda', banner: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=2070', title: 'Estilo & Tendência', sub: 'Roupas e acessórios para você brilhar 👗' },
   { id: 'bolsas', label: 'Bolsas', banner: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=2070', title: 'Bolsas & Acessórios', sub: 'Complete seu look com elegância 👜' },
   { id: 'bebes', label: 'Infantil', banner: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=2070', title: 'Mundo dos Pequenos', sub: 'Fraldas, Roupas e Carinho 👶' },
-  { id: 'brinquedos', label: 'Brinquedos', banner: 'https://images.unsplash.com/photo-1559863473-1c2a13e54721?auto=format&fit=crop&q=80&w=2070', title: 'Hora da Diversão', sub: 'Brinquedos para todas as idades 🧸' },
+  { id: 'brinquedos', label: 'Brinquedos', banner: 'https://images.unsplash.com/photo-1566576912902-1b6b7dd88d02?auto=format&fit=crop&q=80&w=2070', title: 'Hora da Diversão', sub: 'Brinquedos para todas as idades 🧸' },
   { id: 'games', label: 'Games', banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070', title: 'Zona Gamer', sub: 'Consoles, Jogos e Periféricos 🎮' },
   { id: 'saude', label: 'Saúde', banner: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=2070', title: 'Saúde & Bem-Estar', sub: 'Vitaminas e cuidados pessoais 💊' },
   { id: 'esportes', label: 'Esportes', banner: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=2070', title: 'Vida Fitness', sub: 'Equipamentos e roupas esportivas ⚽' },
@@ -79,7 +73,12 @@ const App = () => {
         const response = await fetch('/promocoes.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Erro');
         const data = await response.json();
-        setProducts(data);
+        
+        // --- MODIFICAÇÃO DE ORDENAÇÃO ---
+        // Ordena por ID (Timestamp) Decrescente: Mais recentes primeiro
+        const sortedData = data.sort((a: Product, b: Product) => Number(b.id) - Number(a.id));
+        
+        setProducts(sortedData);
       } catch (error) { setProducts([]); } finally { setLoading(false); }
     }
     fetchPromocoes();
@@ -191,9 +190,8 @@ const App = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           </div>
         </div>
-        {/* NAV ATUALIZADO: Alinhamento à direita em Desktop (md:justify-end) */}
         <nav className="w-full overflow-x-auto hide-scroll bg-white pb-2 pl-4">
-          <div className="flex gap-2 min-w-max px-4 md:w-full md:justify-end">
+          <div className="flex gap-2 min-w-max pr-4">
             {LOCAL_CATEGORIES.map((cat) => {
               const isActive = activeCategory === cat.id; const isSpecial = cat.id === 'volta-aulas';
               return ( <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border flex items-center gap-1 ${isActive ? (isSpecial ? 'bg-yellow-400 text-black border-yellow-500 shadow-md' : 'bg-secondary text-white border-secondary') : (isSpecial ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')}`}>{cat.label}</button> );
