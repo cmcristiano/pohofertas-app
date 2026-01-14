@@ -1234,5 +1234,29 @@
     "validity": "2026-02-11",
     "discount": 24,
     "link": "https://amzn.to/4qdErMl"
+  },
+  {
+    "id": "1768383057640",
+    "title": "Tênis de Corrida Mizuno Wave Rebellion Pro 2 (utilize o cupom PROMOPERFORMANCE)",
+    "oldPrice": 1999.99,
+    "newPrice": 1099.99,
+    "image": "https://mizunobr.vtexassets.com/arquivos/ids/249584-1600-1600?v=638545763044530000&width=1600&height=1600&aspect=true",
+    "store": "Mizuno",
+    "category": "achados",
+    "validity": "2026-01-20",
+    "discount": 45,
+    "link": "https://tidd.ly/4qSpvD5"
+  },
+  {
+    "id": "1768383225795",
+    "title": "Tênis de Corrida Masculino Mizuno Base One (utilize o cupom PROMOPERFORMANCE)",
+    "oldPrice": 699.99,
+    "newPrice": 529.99,
+    "image": "https://mizunobr.vtexassets.com/arquivos/ids/252167-1600-1600?v=639029914179900000&width=1600&height=1600&aspect=true",
+    "store": "Mizuno",
+    "category": "achados",
+    "validity": "2026-01-20",
+    "discount": 24,
+    "link": "https://www.awin1.com/cread.php?awinmid=51271&awinaffid=2678244&ued=https%3A%2F%2Fwww.mizuno.com.br%2Ftenis-de-corrida-masculino-mizuno-base-one-101119119-1-004%2Fp"
   }
 ]
