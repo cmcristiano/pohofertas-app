@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Instagram, Facebook, Link as LinkIcon, Home as HomeIcon, User, 
-  ArrowRight, RefreshCw, Tag, CheckCircle, ShieldCheck, ChevronLeft, ChevronRight,
-  ShoppingBag, Zap, Sparkles, Star, Quote
+  ArrowRight, RefreshCw, ShoppingBag, Zap, Sparkles, Star, Quote, ChevronLeft, ChevronRight, CheckCircle, ShieldCheck
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
+
+// --- CONFIGURAÇÃO: SEU WHATSAPP AQUI ---
+const SEU_NUMERO_WHATSAPP = '5571982598343'; // Troque pelo seu número
+const MENSAGEM_VIP = 'Olá Cris! Vi no site PohOfertas e quero entrar na lista VIP para receber promoções!';
 
 // --- CONFIGURAÇÃO DAS CATEGORIAS ---
 const LOCAL_CATEGORIES = [
@@ -38,7 +41,7 @@ const SLIDE_COLORS = [
   'bg-gradient-to-r from-red-600 to-orange-500',      
 ];
 
-// --- NOVOS DEPOIMENTOS ---
+// --- DEPOIMENTOS ---
 const TESTIMONIALS = [
   { name: 'Fernanda L.', store: 'Shein', text: 'O vestido pro Ano Novo ficou perfeito! O tecido é ótimo e paguei super barato seguindo a dica.', avatar: 'FL' },
   { name: 'Mariana S.', store: 'Shopee', text: 'Segui a dica do Cris e peguei a AirFryer com 40% de desconto. Chegou certinho!', avatar: 'MS' },
@@ -49,7 +52,7 @@ const TESTIMONIALS = [
 const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
-  
+   
   // ESTADOS DE FILTRO
   const [sortBy, setSortBy] = useState('relevance');
   const [filterStore, setFilterStore] = useState('all');
@@ -58,15 +61,11 @@ const App = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  
-  // ESTADO DO FORMULÁRIO DE LEADS
-  const [leadForm, setLeadForm] = useState({ name: '', email: '', phone: '' });
-  const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'success'>('idle');
-  const [formErrors, setFormErrors] = useState({ email: '', phone: '' });
-  
+   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 1. CARREGA OS PRODUTOS
   useEffect(() => {
     async function fetchPromocoes() {
       try {
@@ -74,7 +73,6 @@ const App = () => {
         if (!response.ok) throw new Error('Erro');
         const data = await response.json();
         
-        // --- MODIFICAÇÃO DE ORDENAÇÃO ---
         // Ordena por ID (Timestamp) Decrescente: Mais recentes primeiro
         const sortedData = data.sort((a: Product, b: Product) => Number(b.id) - Number(a.id));
         
@@ -83,6 +81,26 @@ const App = () => {
     }
     fetchPromocoes();
   }, []);
+
+  // 2. (NOVO) LÊ O LINK E ABRE O PRODUTO AUTOMATICAMENTE
+  useEffect(() => {
+    // Só roda se os produtos já foram carregados
+    if (products.length > 0) {
+        // Pega o código "?id=..." lá do navegador
+        const params = new URLSearchParams(window.location.search);
+        const urlId = params.get('id');
+
+        if (urlId) {
+            // Procura o produto com esse ID
+            const foundProduct = products.find(p => String(p.id) === urlId);
+            
+            if (foundProduct) {
+                // Se achar, abre o modal direto!
+                handleShare(foundProduct);
+            }
+        }
+    }
+  }, [products]); // Fica vigiando a lista de produtos
 
   const heroSlides = useMemo(() => {
     const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
@@ -142,23 +160,12 @@ const App = () => {
     return result;
   }, [activeCategory, searchQuery, products, filterStore, sortBy]);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, ''); if (value.length > 11) value = value.slice(0, 11);
-    if (value.length > 2) { value = `(${value.slice(0, 2)}) ${value.slice(2)}`; if (value.length > 10) value = `${value.slice(0, 10)}-${value.slice(10)}`; }
-    setLeadForm({ ...leadForm, phone: value }); if (formErrors.phone) setFormErrors({ ...formErrors, phone: '' });
+  const handleVipClick = () => {
+    const message = encodeURIComponent(MENSAGEM_VIP);
+    const url = `https://wa.me/${SEU_NUMERO_WHATSAPP}?text=${message}`;
+    window.open(url, '_blank');
   };
 
-  const handleLeadSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); let errors = { email: '', phone: '' }; let isValid = true;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadForm.email)) { errors.email = 'E-mail inválido.'; isValid = false; }
-    const rawPhone = leadForm.phone.replace(/\D/g, ''); if (rawPhone.length < 11 || rawPhone[2] !== '9') { errors.phone = 'Celular inválido.'; isValid = false; }
-    if (!isValid) { setFormErrors(errors); return; }
-    setFormStatus('sending');
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwY3v9amCacI9BCr2uozFWmz86QMQjwqvDT7jXbJ6KLemmSymxByy09HidpcxFzjh-Olw/exec'; 
-    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(leadForm) })
-    .then(() => { setFormStatus('success'); setFormErrors({ email: '', phone: '' }); setTimeout(() => { setFormStatus('idle'); setLeadForm({ name: '', email: '', phone: '' }); }, 4000); })
-    .catch(() => { alert("Erro ao salvar."); setFormStatus('idle'); });
-  };
   const handleShare = (p: Product) => { setSelectedProduct(p); setIsShareModalOpen(true); };
 
   return (
@@ -200,7 +207,7 @@ const App = () => {
         </nav>
       </header>
 
-      {/* --- SESSÃO DE CAPTURA DE LEAD (TOPO) --- */}
+      {/* --- SESSÃO DE CAPTURA DE LEAD --- */}
       <section className="bg-secondary text-white py-8 px-4 relative overflow-hidden shadow-2xl z-30">
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
@@ -214,28 +221,20 @@ const App = () => {
                     Ofertas Secretas <br/><span className="text-primary">no seu Zap 📲</span>
                 </h2>
                 <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4 md:mb-0">
-                    Não perca tempo procurando. Eu garimpo os melhores preços e te aviso. <br/><b>Cadastre-se para entrar na lista VIP.</b>
+                    Não perca tempo procurando. Eu garimpo os melhores preços e te aviso. <br/><b>Entre para a lista VIP agora mesmo.</b>
                 </p>
             </div>
 
-            <div className="w-full md:w-1/2 bg-white/5 p-5 md:p-6 rounded-2xl border border-white/10 backdrop-blur-sm shadow-inner">
-                {formStatus === 'success' ? (
-                    <div className="h-full flex flex-col justify-center items-center py-8 text-green-200 animate-in fade-in zoom-in">
-                        <CheckCircle size={48} className="mb-4 text-green-400"/>
-                        <span className="font-bold text-xl">Cadastro Realizado!</span>
-                        <span className="text-sm text-center mt-2">Vou te adicionar em breve. Fique de olho no Zap!</span>
-                    </div>
-                ) : (
-                    <form onSubmit={handleLeadSubmit} className="space-y-3">
-                        <input type="text" placeholder="Seu Nome" required value={leadForm.name} onChange={e=>setLeadForm({...leadForm, name: e.target.value})} className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/60 outline-none transition placeholder-gray-500"/>
-                        <input type="tel" placeholder="Seu WhatsApp (com DDD)" required value={leadForm.phone} onChange={handlePhoneChange} className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white text-sm focus:border-primary focus:bg-black/60 outline-none transition placeholder-gray-500"/>
-                        
-                        <button type="submit" disabled={formStatus==='sending'} className="w-full bg-primary py-3.5 rounded-lg font-bold text-sm hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-900/20 transition flex justify-center items-center gap-2 mt-2 transform active:scale-95">
-                            {formStatus==='sending' ? <RefreshCw className="animate-spin"/> : <>QUERO ENTRAR NA LISTA VIP <ArrowRight size={16}/></>}
-                        </button>
-                        <div className="text-[10px] text-gray-500 text-center flex justify-center gap-1 mt-2"><ShieldCheck size={10}/> Zero spam. Apenas ofertas reais.</div>
-                    </form>
-                )}
+            <div className="w-full md:w-1/2 bg-white/5 p-8 rounded-2xl border border-white/10 backdrop-blur-sm shadow-inner flex flex-col items-center justify-center text-center">
+                 <p className="text-white text-sm mb-6 max-w-xs">
+                   Ao clicar abaixo, você será redirecionado para o meu WhatsApp e já vou deixar seu contato salvo para as próximas ofertas! 👇
+                 </p>
+                 <button onClick={handleVipClick} className="w-full bg-[#25D366] py-4 rounded-lg font-bold text-white text-sm hover:bg-[#20bd5a] hover:shadow-lg hover:shadow-green-900/20 transition flex justify-center items-center gap-2 transform active:scale-95 border-b-4 border-[#128c7e]">
+                     <span className="text-xl">👉</span> QUERO ENTRAR NA LISTA VIP
+                 </button>
+                 <div className="text-[10px] text-gray-400 text-center flex justify-center gap-1 mt-4">
+                    <ShieldCheck size={10}/> 100% Gratuito e Seguro
+                 </div>
             </div>
          </div>
       </section>
@@ -341,7 +340,7 @@ const App = () => {
         )}
       </main>
 
-      {/* --- SEÇÃO DE PROVA SOCIAL (NOVO) --- */}
+      {/* --- PROVA SOCIAL --- */}
       <section className="container mx-auto px-4 py-8 mb-8">
         <div className="flex items-center gap-2 mb-6">
             <Quote className="text-primary" size={24}/>
@@ -376,7 +375,7 @@ const App = () => {
           <p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p>
           <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
       </footer>
-      
+       
       {/* MOBILE NAV */}
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
         <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><HomeIcon size={20}/><span className="text-[10px] font-medium mt-1">Início</span></button>
