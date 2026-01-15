@@ -7,10 +7,9 @@ import { Product } from './types';
 import ShareModal from './components/ShareModal';
 
 // --- CONFIGURAÇÃO: SEU WHATSAPP AQUI ---
-const SEU_NUMERO_WHATSAPP = '5571982598343'; // Troque pelo seu número
+const SEU_NUMERO_WHATSAPP = '5571982598343'; // <--- TROQUE AQUI
 const MENSAGEM_VIP = 'Olá Cris! Vi no site PohOfertas e quero entrar na lista VIP para receber promoções!';
 
-// --- CONFIGURAÇÃO DAS CATEGORIAS ---
 const LOCAL_CATEGORIES = [
   { id: 'all', label: 'Tudo' },
   { id: 'volta-aulas', label: '✏️ Volta às Aulas', banner: '/banner-escola.jpg', title: 'Volta às Aulas 2026', sub: 'Material Escolar com Preço de Atacado 🎒' },
@@ -41,7 +40,6 @@ const SLIDE_COLORS = [
   'bg-gradient-to-r from-red-600 to-orange-500',      
 ];
 
-// --- DEPOIMENTOS ---
 const TESTIMONIALS = [
   { name: 'Fernanda L.', store: 'Shein', text: 'O vestido pro Ano Novo ficou perfeito! O tecido é ótimo e paguei super barato seguindo a dica.', avatar: 'FL' },
   { name: 'Mariana S.', store: 'Shopee', text: 'Segui a dica do Cris e peguei a AirFryer com 40% de desconto. Chegou certinho!', avatar: 'MS' },
@@ -52,60 +50,50 @@ const TESTIMONIALS = [
 const App = () => {
   const [activeCategory, setActiveCategory] = useState('volta-aulas');
   const [searchQuery, setSearchQuery] = useState('');
-   
-  // ESTADOS DE FILTRO
   const [sortBy, setSortBy] = useState('relevance');
   const [filterStore, setFilterStore] = useState('all');
-
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-   
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. CARREGA OS PRODUTOS
   useEffect(() => {
     async function fetchPromocoes() {
       try {
         const response = await fetch('/promocoes.json?t=' + new Date().getTime());
         if (!response.ok) throw new Error('Erro');
         const data = await response.json();
-        
-        // Ordena por ID (Timestamp) Decrescente: Mais recentes primeiro
         const sortedData = data.sort((a: Product, b: Product) => Number(b.id) - Number(a.id));
-        
         setProducts(sortedData);
       } catch (error) { setProducts([]); } finally { setLoading(false); }
     }
     fetchPromocoes();
   }, []);
 
-  // 2. (NOVO) LÊ O LINK E ABRE O PRODUTO AUTOMATICAMENTE
   useEffect(() => {
-    // Só roda se os produtos já foram carregados
+    const params = new URLSearchParams(window.location.search);
+    const urlCat = params.get('cat');
+    if (urlCat) {
+        const isValid = LOCAL_CATEGORIES.some(c => c.id === urlCat);
+        if (isValid) {
+            setActiveCategory(urlCat);
+        }
+    }
     if (products.length > 0) {
-        // Pega o código "?id=..." lá do navegador
-        const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
-
         if (urlId) {
-            // Procura o produto com esse ID
             const foundProduct = products.find(p => String(p.id) === urlId);
-            
             if (foundProduct) {
-                // Se achar, abre o modal direto!
                 handleShare(foundProduct);
             }
         }
     }
-  }, [products]); // Fica vigiando a lista de produtos
+  }, [products]);
 
   const heroSlides = useMemo(() => {
     const currentCatConfig = LOCAL_CATEGORIES.find(c => c.id === activeCategory) || LOCAL_CATEGORIES[0];
-    
-    // Banner Principal
     let mainSlide = {
         id: 'main-hero', 
         color: SLIDE_COLORS[0],
@@ -115,14 +103,12 @@ const App = () => {
         link: '#promo-list',
         isFullBanner: true 
     };
-
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    const valid = products.filter(p => new Date(p.validity) >= today);
+    const valid = products.filter(p => new Date(p.validity).getTime() >= today.getTime()); // Correção de data aqui
     let categoryProducts = valid;
     if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados' && activeCategory !== 'volta-aulas') {
         categoryProducts = valid.filter(p => p.category === activeCategory);
     }
-    
     const top4 = categoryProducts.sort((a, b) => b.discount - a.discount).slice(0, 4);
     const productSlides = top4.map((p, i) => ({
         id: p.id, color: SLIDE_COLORS[(i + 1) % SLIDE_COLORS.length], 
@@ -138,14 +124,14 @@ const App = () => {
 
   const filteredProducts = useMemo(() => {
     let result = products.filter((p) => {
-      if (new Date(p.validity) < new Date().setHours(0,0,0,0)) return false;
+      // CORREÇÃO DA LINHA DO ERRO (DATE vs NUMBER)
+      if (new Date(p.validity).getTime() < new Date().setHours(0,0,0,0)) return false;
       
       if (activeCategory === 'volta-aulas') {
           if (!['papelaria', 'livros', 'informatica', 'tech', 'mochilas'].includes(p.category)) return false;
       } else if (activeCategory !== 'all' && activeCategory !== 'novos' && activeCategory !== 'achados') {
           if (p.category !== activeCategory) return false;
       }
-      
       if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (filterStore !== 'all') {
           if (!p.store.toLowerCase().includes(filterStore.toLowerCase())) return false;
@@ -156,7 +142,6 @@ const App = () => {
     if (sortBy === 'price-asc') result.sort((a, b) => a.newPrice - b.newPrice);
     else if (sortBy === 'price-desc') result.sort((a, b) => b.newPrice - a.newPrice);
     else if (sortBy === 'alpha') result.sort((a, b) => a.title.localeCompare(b.title));
-
     return result;
   }, [activeCategory, searchQuery, products, filterStore, sortBy]);
 
@@ -165,19 +150,16 @@ const App = () => {
     const url = `https://wa.me/${SEU_NUMERO_WHATSAPP}?text=${message}`;
     window.open(url, '_blank');
   };
-
   const handleShare = (p: Product) => { setSelectedProduct(p); setIsShareModalOpen(true); };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
        <style>{`.hide-scroll::-webkit-scrollbar {display: none} .hide-scroll {-ms-overflow-style: none; scrollbar-width: none;}`}</style>
-
       {/* TOP STRIPE */}
       <div className="bg-secondary text-white text-[10px] py-1 px-3 flex justify-between items-center z-50 border-t border-white/10">
         <span className="font-bold">OFERTAS SELECIONADAS POR CRIS MELLO 🧡</span>
         <div className="flex gap-3"><Instagram size={12}/><Facebook size={12}/></div>
       </div>
-
       {/* HEADER */}
       <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-100">
         <div className="container mx-auto px-4 py-3">
@@ -206,39 +188,25 @@ const App = () => {
           </div>
         </nav>
       </header>
-
-      {/* --- SESSÃO DE CAPTURA DE LEAD --- */}
+      {/* SESSÃO DE CAPTURA DE LEAD */}
       <section className="bg-secondary text-white py-8 px-4 relative overflow-hidden shadow-2xl z-30">
          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-         
          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8 relative z-10">
             <div className="w-full md:w-1/2 text-center md:text-left">
                 <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-1.5 rounded-full text-xs font-bold mb-4 border border-white/20">
                     <Sparkles size={12} className="text-yellow-400 animate-pulse"/> CLUBE POH VIP
                 </div>
-                <h2 className="text-2xl md:text-4xl font-black mb-3 leading-tight">
-                    Ofertas Secretas <br/><span className="text-primary">no seu Zap 📲</span>
-                </h2>
-                <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4 md:mb-0">
-                    Não perca tempo procurando. Eu garimpo os melhores preços e te aviso. <br/><b>Entre para a lista VIP agora mesmo.</b>
-                </p>
+                <h2 className="text-2xl md:text-4xl font-black mb-3 leading-tight">Ofertas Secretas <br/><span className="text-primary">no seu Zap 📲</span></h2>
+                <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4 md:mb-0">Não perca tempo procurando. Eu garimpo os melhores preços e te aviso. <br/><b>Entre para a lista VIP agora mesmo.</b></p>
             </div>
-
             <div className="w-full md:w-1/2 bg-white/5 p-8 rounded-2xl border border-white/10 backdrop-blur-sm shadow-inner flex flex-col items-center justify-center text-center">
-                 <p className="text-white text-sm mb-6 max-w-xs">
-                   Ao clicar abaixo, você será redirecionado para o meu WhatsApp e já vou deixar seu contato salvo para as próximas ofertas! 👇
-                 </p>
-                 <button onClick={handleVipClick} className="w-full bg-[#25D366] py-4 rounded-lg font-bold text-white text-sm hover:bg-[#20bd5a] hover:shadow-lg hover:shadow-green-900/20 transition flex justify-center items-center gap-2 transform active:scale-95 border-b-4 border-[#128c7e]">
-                     <span className="text-xl">👉</span> QUERO ENTRAR NA LISTA VIP
-                 </button>
-                 <div className="text-[10px] text-gray-400 text-center flex justify-center gap-1 mt-4">
-                    <ShieldCheck size={10}/> 100% Gratuito e Seguro
-                 </div>
+                 <p className="text-white text-sm mb-6 max-w-xs">Ao clicar abaixo, você será redirecionado para o meu WhatsApp e já vou deixar seu contato salvo para as próximas ofertas! 👇</p>
+                 <button onClick={handleVipClick} className="w-full bg-[#25D366] py-4 rounded-lg font-bold text-white text-sm hover:bg-[#20bd5a] hover:shadow-lg hover:shadow-green-900/20 transition flex justify-center items-center gap-2 transform active:scale-95 border-b-4 border-[#128c7e]"><span className="text-xl">👉</span> QUERO ENTRAR NA LISTA VIP</button>
+                 <div className="text-[10px] text-gray-400 text-center flex justify-center gap-1 mt-4"><ShieldCheck size={10}/> 100% Gratuito e Seguro</div>
             </div>
          </div>
       </section>
-
       {/* CARROSSEL */}
       {heroSlides.length > 0 && (
         <section className="relative w-full h-[180px] md:h-[300px] overflow-hidden bg-gray-200 group" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
@@ -246,71 +214,32 @@ const App = () => {
             const isFullBanner = slide.isFullBanner;
             return (
             <div key={slide.id} className={`absolute inset-0 transition-opacity duration-700 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'} ${slide.color}`}>
-              {isFullBanner && (
-                <>
-                  <img src={slide.img} alt={slide.text} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070'; }}/>
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
-                </>
-              )}
+              {isFullBanner && (<><img src={slide.img} alt={slide.text} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070'; }}/><div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div></>)}
               <div className="container mx-auto h-full px-6 flex items-center justify-between relative z-20">
                 <div className={`flex flex-col items-start text-white ${isFullBanner ? 'w-full md:w-[60%]' : 'w-[65%] md:w-[70%]'} z-10`}>
-                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 backdrop-blur-md ${isFullBanner ? 'bg-primary text-white' : 'bg-black/20'}`}>
-                     {index === 0 ? `✨ ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label || 'DESTAQUE'}` : `TOP ${index} DO DIA`}
-                   </span>
+                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 backdrop-blur-md ${isFullBanner ? 'bg-primary text-white' : 'bg-black/20'}`}>{index === 0 ? `✨ ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label || 'DESTAQUE'}` : `TOP ${index} DO DIA`}</span>
                    <h2 className="text-xl md:text-5xl font-black leading-tight line-clamp-2 mb-2 drop-shadow-lg">{slide.text}</h2>
                    <p className="text-xs md:text-xl opacity-90 mb-4 line-clamp-2 drop-shadow-md font-medium">{slide.sub}</p>
-                   <a href={slide.link} target="_blank" rel="noreferrer" className="bg-white text-black font-bold py-2 px-6 rounded-full text-xs md:text-sm shadow-lg hover:scale-105 transition flex items-center gap-2">
-                     VER AGORA <ArrowRight size={14} />
-                   </a>
+                   <a href={slide.link} target="_blank" rel="noreferrer" className="bg-white text-black font-bold py-2 px-6 rounded-full text-xs md:text-sm shadow-lg hover:scale-105 transition flex items-center gap-2">VER AGORA <ArrowRight size={14} /></a>
                 </div>
-                {!isFullBanner && (
-                  <div className="w-[35%] md:w-[30%] flex justify-center h-full py-4 relative">
-                    <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full transform scale-75"></div>
-                    <img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl relative z-10 transform hover:scale-110 transition duration-500" onError={(e)=>{(e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png'}}/>
-                  </div>
-                )}
+                {!isFullBanner && (<div className="w-[35%] md:w-[30%] flex justify-center h-full py-4 relative"><div className="absolute inset-0 bg-white/20 blur-3xl rounded-full transform scale-75"></div><img src={slide.img} className="h-full w-auto object-contain drop-shadow-2xl relative z-10 transform hover:scale-110 transition duration-500" onError={(e)=>{(e.target as HTMLImageElement).src='https://cdn-icons-png.flaticon.com/512/2830/2830312.png'}}/></div>)}
               </div>
             </div>
           )})}
           <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition z-20 opacity-0 group-hover:opacity-100"><ChevronLeft size={24} /></button>
           <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition z-20 opacity-0 group-hover:opacity-100"><ChevronRight size={24} /></button>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-             {heroSlides.map((_, i) => (<button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-primary w-8' : 'bg-white/50 w-2 hover:bg-white/80'}`} />))}
-          </div>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">{heroSlides.map((_, i) => (<button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all shadow-sm ${i === currentSlide ? 'bg-primary w-8' : 'bg-white/50 w-2 hover:bg-white/80'}`} />))}</div>
         </section>
       )}
-
       {/* MAIN CONTENT */}
       <main className="container mx-auto px-4 py-8" id="promo-list">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-                <Zap className="text-primary animate-pulse" size={20}/>
-                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">
-                {activeCategory === 'all' ? '🔥 Ofertas Quentes' : `Melhores de ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label}`}
-                </h2>
-            </div>
-            {/* FILTROS */}
+            <div className="flex items-center gap-2"><Zap className="text-primary animate-pulse" size={20}/><h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">{activeCategory === 'all' ? '🔥 Ofertas Quentes' : `Melhores de ${LOCAL_CATEGORIES.find(c=>c.id===activeCategory)?.label}`}</h2></div>
             <div className="flex gap-2 w-full md:w-auto overflow-x-auto hide-scroll pb-1">
-                <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase">Ordenar:</span>
-                    <select className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                        <option value="relevance">Mais Relevantes</option>
-                        <option value="price-asc">Menor Preço</option>
-                        <option value="price-desc">Maior Preço</option>
-                        <option value="alpha">A-Z</option>
-                    </select>
-                </div>
-                <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase">Loja:</span>
-                    <select className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer" value={filterStore} onChange={(e) => setFilterStore(e.target.value)}>
-                        <option value="all">Todas as Lojas</option>
-                        <option value="Amazon">Amazon</option>
-                        <option value="Shopee">Shopee</option>
-                    </select>
-                </div>
+                <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg"><span className="text-[10px] text-gray-400 font-bold uppercase">Ordenar:</span><select className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer" value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option value="relevance">Mais Relevantes</option><option value="price-asc">Menor Preço</option><option value="price-desc">Maior Preço</option><option value="alpha">A-Z</option></select></div>
+                <div className="flex items-center gap-1 bg-white border border-gray-200 px-3 py-1.5 rounded-lg"><span className="text-[10px] text-gray-400 font-bold uppercase">Loja:</span><select className="text-xs font-bold text-gray-700 bg-transparent outline-none cursor-pointer" value={filterStore} onChange={(e) => setFilterStore(e.target.value)}><option value="all">Todas as Lojas</option><option value="Amazon">Amazon</option><option value="Shopee">Shopee</option></select></div>
             </div>
         </div>
-        
         {loading ? <div className="text-center py-20"><RefreshCw className="animate-spin mx-auto text-primary mb-2"/><p className="text-gray-400 text-sm">Carregando ofertas...</p></div> : 
          filteredProducts.length === 0 ? <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300"><ShoppingBag className="mx-auto text-gray-300 mb-2" size={40}/><p className="text-gray-400">Nenhuma oferta encontrada.</p></div> : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -318,20 +247,11 @@ const App = () => {
               <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group hover:shadow-md transition duration-300">
                 {p.discount > 0 && <div className="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-br z-10 shadow-sm">{p.discount}% OFF</div>}
                 <button onClick={() => handleShare(p)} className="absolute top-2 right-2 bg-gray-100 p-2 rounded-full text-gray-500 hover:text-primary hover:bg-orange-50 transition z-10"><LinkIcon size={14}/></button>
-                <div className="w-full h-48 bg-white p-6 flex items-center justify-center border-b border-gray-50 group-hover:bg-gray-50 transition">
-                  <img src={p.image} className="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-500" loading="lazy" onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/150'}}/>
-                </div>
+                <div className="w-full h-48 bg-white p-6 flex items-center justify-center border-b border-gray-50 group-hover:bg-gray-50 transition"><img src={p.image} className="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-500" loading="lazy" onError={(e)=>{(e.target as HTMLImageElement).src='https://placehold.co/150'}}/></div>
                 <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 px-1.5 py-0.5 rounded">{p.store}</span>
-                      {p.category === 'volta-aulas' && <span className="text-[10px] text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded font-bold">ESCOLA</span>}
-                  </div>
+                  <div className="flex justify-between items-start mb-2"><span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-100 px-1.5 py-0.5 rounded">{p.store}</span>{p.category === 'volta-aulas' && <span className="text-[10px] text-yellow-600 bg-yellow-100 px-1.5 py-0.5 rounded font-bold">ESCOLA</span>}</div>
                   <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 h-10 mb-2 leading-tight group-hover:text-primary transition">{p.title}</h3>
-                  <div className="flex flex-col mb-3">
-                    {p.oldPrice > 0 && <span className="text-xs text-gray-400 line-through">R$ {p.oldPrice.toFixed(2)}</span>}
-                    <span className="text-xl font-black text-gray-900">R$ {p.newPrice.toFixed(2)}</span>
-                    {p.oldPrice > 0 && <span className="text-[10px] text-green-600 font-medium">Economia de R$ {(p.oldPrice - p.newPrice).toFixed(2)}</span>}
-                  </div>
+                  <div className="flex flex-col mb-3">{p.oldPrice > 0 && <span className="text-xs text-gray-400 line-through">R$ {p.oldPrice.toFixed(2)}</span>}<span className="text-xl font-black text-gray-900">R$ {p.newPrice.toFixed(2)}</span>{p.oldPrice > 0 && <span className="text-[10px] text-green-600 font-medium">Economia de R$ {(p.oldPrice - p.newPrice).toFixed(2)}</span>}</div>
                   <a href={p.link} target="_blank" className="block text-center bg-gray-900 text-white font-bold text-xs py-2.5 rounded-lg hover:bg-primary transition shadow-sm hover:shadow-lg transform active:scale-95">PEGAR PROMOÇÃO</a>
                 </div>
               </div>
@@ -339,44 +259,20 @@ const App = () => {
           </div>
         )}
       </main>
-
-      {/* --- PROVA SOCIAL --- */}
+      {/* PROVA SOCIAL */}
       <section className="container mx-auto px-4 py-8 mb-8">
-        <div className="flex items-center gap-2 mb-6">
-            <Quote className="text-primary" size={24}/>
-            <h2 className="text-xl font-black text-gray-800 uppercase">Quem segue, economiza</h2>
-        </div>
+        <div className="flex items-center gap-2 mb-6"><Quote className="text-primary" size={24}/><h2 className="text-xl font-black text-gray-800 uppercase">Quem segue, economiza</h2></div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {TESTIMONIALS.map((t, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-sm">
-                            {t.avatar}
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-800">{t.name}</p>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">{t.store}</span>
-                        </div>
-                    </div>
+                    <div className="flex items-center gap-3 mb-4"><div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-sm">{t.avatar}</div><div><p className="text-sm font-bold text-gray-800">{t.name}</p><span className="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">{t.store}</span></div></div>
                     <p className="text-gray-600 text-sm italic mb-4">"{t.text}"</p>
-                    <div className="flex text-yellow-400 gap-0.5">
-                        <Star size={14} fill="currentColor"/>
-                        <Star size={14} fill="currentColor"/>
-                        <Star size={14} fill="currentColor"/>
-                        <Star size={14} fill="currentColor"/>
-                        <Star size={14} fill="currentColor"/>
-                    </div>
+                    <div className="flex text-yellow-400 gap-0.5"><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/></div>
                 </div>
             ))}
         </div>
       </section>
-
-      <footer className="bg-white border-t py-8 text-center">
-          <p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p>
-          <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
-      </footer>
-       
-      {/* MOBILE NAV */}
+      <footer className="bg-white border-t py-8 text-center"><p className="text-sm font-bold text-gray-800">PohOfertas &copy; 2026</p><p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p></footer>
       <nav className="md:hidden fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
         <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="flex flex-col items-center text-primary"><HomeIcon size={20}/><span className="text-[10px] font-medium mt-1">Início</span></button>
         <button onClick={()=>document.querySelector('input')?.focus()} className="flex flex-col items-center text-gray-400 hover:text-gray-600"><Search size={20}/><span className="text-[10px] font-medium mt-1">Buscar</span></button>
@@ -386,5 +282,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;
