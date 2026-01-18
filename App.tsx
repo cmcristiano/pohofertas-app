@@ -1,9 +1,11 @@
 import React from 'react';
 import { RefreshCw, Hammer, ShieldCheck, Sparkles, MessageCircle } from 'lucide-react';
+import AvisoAfiliado from './components/AvisoAfiliado';
 
 // ✅ CONFIG (opcional)
 const SHOW_WHATSAPP_BUTTON = false; // true = mostra botão
-const WHATSAPP_LINK = 'https://wa.me/5571982598343?text=Ol%C3%A1%20Cris!%20Vi%20o%20PohOfertas%20e%20quero%20entrar%20na%20lista%20VIP.';
+const WHATSAPP_LINK =
+  'https://wa.me/5571982598343?text=Ol%C3%A1%20Cris!%20Vi%20o%20PohOfertas%20e%20quero%20entrar%20na%20lista%20VIP.';
 
 const App = () => {
   return (
@@ -114,6 +116,12 @@ const App = () => {
         <p className="text-center text-xs text-white/35 mt-5">
           PohOfertas © 2026 — economia com pé no chão.
         </p>
+
+        {/* AVISO AFILIADO (BLINDADO) */}
+        <div className="mt-4">
+          <AvisoAfiliado variant="medio" />
+        </div>
+
       </div>
     </div>
   );
