@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { Product } from './types';
 import ShareModal from './components/ShareModal';
-import AvisoAfiliado from './components/AvisoAfiliado';
+import AvisoInfo from './components/AvisoInfo';
 
 // --- CONFIGURAÇÃO: SEU WHATSAPP ---
 const SEU_NUMERO_WHATSAPP = '5571982598343'; 
@@ -290,7 +290,7 @@ const App = () => {
         <p className="text-xs text-gray-400 mt-1">Preços e estoques sujeitos a alteração sem aviso prévio.</p>
         {/* AVISO AFILIADO (Integrado) */}
         <div className="mt-4 flex justify-center">
-             <AvisoAfiliado variant="simples" />
+             <AvisoInfo variant="simples" />
         </div>
       </footer>
 

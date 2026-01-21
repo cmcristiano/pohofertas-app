@@ -1,11 +1,11 @@
 import React from 'react';
 import { ShieldCheck, Info } from 'lucide-react';
 
-interface AvisoAfiliadoProps {
+interface AvisoInfoProps {
   variant?: 'simples' | 'completo' | 'box';
 }
 
-const AvisoAfiliado: React.FC<AvisoAfiliadoProps> = ({ variant = 'simples' }) => {
+const AvisoInfo: React.FC<AvisoAfiliadoProps> = ({ variant = 'simples' }) => {
   if (variant === 'simples') {
     return (
       <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-400 opacity-60 hover:opacity-100 transition-opacity mt-2">
@@ -30,4 +30,4 @@ const AvisoAfiliado: React.FC<AvisoAfiliadoProps> = ({ variant = 'simples' }) =>
   return null;
 };
 
-export default AvisoAfiliado;
+export default AvisoInfo;
